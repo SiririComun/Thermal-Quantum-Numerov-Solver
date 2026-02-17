@@ -1,5 +1,7 @@
 # Thermal-Quantum-Numerov-Solver
 
+**[Read in English](README.md)**
+
 [![Versión de Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![Licencia: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Universidad](https://img.shields.io/badge/Universidad-UdeA-green)](https://www.udea.edu.co/)
