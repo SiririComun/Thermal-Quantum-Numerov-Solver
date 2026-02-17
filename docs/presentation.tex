@@ -1,0 +1,307 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+
+\usepackage[spanish]{babel}
+\decimalpoint
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{physics}
+\usepackage{xcolor}
+
+% Configuración Beamer
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+% Paleta de colores personalizada
+\definecolor{darkblue}{rgb}{0.1, 0.2, 0.5}
+\definecolor{lightblue}{rgb}{0.3, 0.5, 0.9}
+\setbeamercolor{structure}{fg=darkblue}
+\setbeamercolor{alerted text}{fg=red}
+
+\title{Estudio Termodinámico de Partículas Cuánticas en Pozos de Potencial}
+\subtitle{Efectos de Temperatura, Estadística y Confinamiento}
+\author{Juan Jose Montoya Sánchez \and Juan Pablo Sánchez Arroyave}
+\institute{Instituto de Física, Universidad de Antioquia, Medellín, Colombia}
+\date{\today}
+
+\begin{document}
+
+% Portada
+\frame{\titlepage}
+
+% ====================
+% SECCIÓN 1: INTRODUCCIÓN Y MOTIVACIÓN (COMPRIMIDA)
+% ====================
+\section{Introducción}
+
+\frame{
+    \frametitle{Introducción y Motivación}
+    \begin{columns}
+        \column{0.5\textwidth}
+        \textbf{Preguntas Fundamentales:}
+        \begin{enumerate}
+            \item ¿Comportamiento de sistemas cuánticos confinados a $T$ finita?
+            \item ¿Son las correlaciones \textbf{universales} independientemente de geometría?
+            \item ¿Cómo conecta microscópico con límite termodinámico?
+        \end{enumerate}
+        \vspace{0.3cm}
+        \textbf{Miranda (2019):} Analizó pozo infinito únicamente
+        
+        \column{0.5\textwidth}
+        \textbf{Nuestro Aporte:}
+        \begin{itemize}
+            \item Extender a múltiples geometrías (finito, armónico, V)
+            \item Sistemas de 2 partículas con efectos de espín
+            \item Validar universalidad vs geometría
+        \end{itemize}
+        \vspace{0.3cm}
+        \textbf{Contexto:} Átomos ultrafríos muestran correlaciones robustas en experimentos
+    \end{columns}
+}
+
+% ====================
+% SECCIÓN 2: MARCO TEÓRICO (2 SLIDES COMPRIMIDAS)
+% ====================
+\section{Marco Teórico}
+
+\frame{
+    \frametitle{Fundamentos: Ensamble Canónico y Estadística}
+    
+    \begin{columns}
+        \column{0.5\textwidth}
+        \textbf{Matriz Densidad Térmica:}
+        \begin{equation*}
+        \hat{\rho} = \frac{1}{Z(T)} \sum_n e^{-E_n/k_B T} |n\rangle\langle n|
+        \end{equation*}
+        
+        \textbf{Densidad de Probabilidad:}
+        \begin{equation*}
+        P_{th}(x, T) = \frac{1}{Z(T)} \sum_{n} |\psi_n(x)|^2 e^{-E_n/k_B T}
+        \end{equation*}
+        
+        \column{0.5\textwidth}
+        \textbf{Dos Partículas - Teorema Espín-Estadística:}
+        
+        Bosones (simétrica):
+        \begin{equation*}
+        \Psi_B = \frac{1}{\sqrt{2}}[\psi_1\psi_2 + \psi_2\psi_1]
+        \end{equation*}
+        
+        Fermiones (antisimétrica):
+        \begin{equation*}
+        \Psi_F = \frac{1}{\sqrt{2}}[\psi_1\psi_2 - \psi_2\psi_1]
+        \end{equation*}
+        
+        $\Rightarrow$ Agrupamiento vs Exclusión Pauli
+    \end{columns}
+}
+
+\frame{
+    \frametitle{Efecto del Espín y Métodos Numéricos}
+    
+    \begin{columns}
+        \column{0.5\textwidth}
+        \textbf{Modulación por Espín:}
+        
+        Bosones $s=1$:
+        \begin{equation*}
+        P^{B,s=1} = \tfrac{8}{9}|\Psi_B|^2 + \tfrac{1}{9}|\Psi_F|^2
+        \end{equation*}
+        
+        Fermiones $s=1/2$:
+        \begin{equation*}
+        P^{F,s=1/2} = \tfrac{1}{4}|\Psi_B|^2 + \tfrac{3}{4}|\Psi_F|^2
+        \end{equation*}
+        
+        \column{0.5\textwidth}
+        \textbf{Métodos Computacionales:}
+        \begin{itemize}
+            \item \textbf{Numerov:} Pozos finitos (4to orden)
+            \item \textbf{Diagonalización:} Potenciales arbitrarios
+            \item \textbf{Criterio convergencia:}
+        \end{itemize}
+        \begin{equation*}
+        \max_x |P_{th}^{(N)} - P_{th}^{(N-1)}| < 10^{-4}
+        \end{equation*}
+    \end{columns}
+}
+
+% ====================
+% SECCIÓN 3: RESULTADOS - TERMALIZACIÓN
+% ====================
+\section{Resultados: Termalización}
+
+\frame{
+    \frametitle{Densidades Térmicas en Diferentes Confinamientos}
+    \begin{columns}
+        \column{0.65\textwidth}
+        \includegraphics[width=\linewidth,height=0.75\textheight,keepaspectratio]{figuresnew/1.png}
+        
+        \column{0.33\textwidth}
+        \small Temperatura homogeneiza:
+        \begin{itemize}
+            \item $t=1$: Estructura nodal
+            \item $t=50$: Distribución uniforme
+        \end{itemize}
+        \vspace{0.3cm}
+        Tunelamiento emerge en $V_0=10$
+    \end{columns}
+}
+
+\frame{
+    \frametitle{Capa Límite Térmica y Convergencia}
+    \begin{columns}
+        \column{0.48\linewidth}
+        \includegraphics[width=\linewidth,height=0.65\textheight,keepaspectratio]{figuresnew/2.png}
+        \column{0.48\linewidth}
+        \includegraphics[width=\linewidth,height=0.65\textheight,keepaspectratio]{figuresnew/3.png}
+    \end{columns}
+    \small Izq: Extensión de capa límite (valores negativos = tunelamiento). Der: Estados requeridos crece con $T$, pero depende del potencial.
+}
+
+% ====================
+% SECCIÓN 4: CORRELACIONES DE DOS PARTÍCULAS
+% ====================
+\section{Correlaciones}
+
+\frame{
+    \frametitle{Bosones vs Fermiones en Pozos Cuadrados}
+    \begin{columns}
+        \column{0.48\linewidth}
+        \includegraphics[width=\linewidth,height=0.65\textheight,keepaspectratio]{figuresnew/4.png}
+        \column{0.48\linewidth}
+        \includegraphics[width=\linewidth,height=0.65\textheight,keepaspectratio]{figuresnew/5.png}
+    \end{columns}
+    \small \textbf{Izq:} Bosones muestran máximo en diagonal. \textbf{Der:} Fermiones muestran exclusión en diagonal.
+}
+
+\frame{
+    \frametitle{Promedios Térmicos y Efecto del Espín}
+    \begin{columns}
+        \column{0.48\linewidth}
+        \includegraphics[width=\linewidth,height=0.65\textheight,keepaspectratio]{figuresnew/6.png}
+        \column{0.48\linewidth}
+        \includegraphics[width=\linewidth,height=0.65\textheight,keepaspectratio]{figuresnew/7.png}
+    \end{columns}
+    \small \textbf{Izq:} Correlaciones persisten a $t=10$ (suavizadas). \textbf{Der:} Espín modula dramáticamente: mezclas 8/9+1/9 y 1/4+3/4.
+}
+
+% ====================
+% SECCIÓN 5: UNIVERSALIDAD
+% ====================
+\section{Universalidad}
+
+\frame{
+    \frametitle{Potenciales Suaves: Bosones}
+    \begin{columns}
+        \column{0.65\textwidth}
+        \includegraphics[width=\linewidth,height=0.75\textheight,keepaspectratio]{figuresnew/8.png}
+        
+        \column{0.33\textwidth}
+        \small 
+        \textbf{Geometrías:}
+        \begin{itemize}
+            \item Armónico truncado (Hermite-Gaussianas)
+            \item Pozo en V (Airy)
+        \end{itemize}
+        \vspace{0.3cm}
+        Ambos muestran máximo en diagonal.
+        \vspace{0.3cm}
+        \textbf{Correlación es universal}
+    \end{columns}
+}
+
+\frame{
+    \frametitle{Potenciales Suaves: Fermiones y Promedios}
+    \begin{columns}
+        \column{0.48\linewidth}
+        \includegraphics[width=\linewidth,height=0.65\textheight,keepaspectratio]{figuresnew/9.png}
+        \column{0.48\linewidth}
+        \includegraphics[width=\linewidth,height=0.65\textheight,keepaspectratio]{figuresnew/10.png}
+    \end{columns}
+    \small Fermiones (izq) y promedios térmicos (der) en potenciales suaves. Estructuras \textbf{idénticas} a pozos cuadrados: universalidad independiente de geometría.
+}
+
+\frame{
+    \frametitle{Efecto del Espín: Potenciales Suaves}
+    \begin{columns}
+        \column{0.65\textwidth}
+        \includegraphics[width=\linewidth,height=0.75\textheight,keepaspectratio]{figuresnew/11.png}
+        
+        \column{0.33\textwidth}
+        \small 
+        Bosones vs fermiones con/sin espín en potenciales suaves.
+        \vspace{0.4cm}
+        
+        \textbf{Conclusión:}
+        \vspace{0.2cm}
+        
+        Mezclas espín-estadística son \textbf{universales} a través de todas las geometrías
+    \end{columns}
+}
+
+% ====================
+% SECCIÓN 6: VALIDACIÓN
+% ====================
+\section{Validación}
+
+\frame{
+    \frametitle{Densidad de Estados: Límite Termodinámico}
+    \begin{columns}
+        \column{0.65\textwidth}
+        \includegraphics[width=\linewidth,height=0.75\textheight,keepaspectratio]{figuresnew/12.png}
+        
+        \column{0.33\textwidth}
+        \small 
+        \textbf{Predicción teórica:}
+        \vspace{0.2cm}
+        
+        $g(E) \propto E^{-1/2}$
+        \vspace{0.4cm}
+        
+        \textbf{Convergencia:}
+        \vspace{0.2cm}
+        
+        Espectro discreto → continuo conforme $L \to \infty$, $V_0 \to \infty$
+        \vspace{0.4cm}
+        
+        Propiedades macroscópicas emergen correctamente
+    \end{columns}
+}
+
+% ====================
+% SECCIÓN 7: CONCLUSIONES (COMPRIMIDA)
+% ====================
+\section{Conclusiones}
+
+\frame{
+    \frametitle{Síntesis y Conclusiones}
+    
+    \begin{enumerate}
+        \item \textbf{Termalización Homogeneizadora:} Temperatura es agente universal que borra estructura nodal. Detalles microscópicos importan cuantitativamente para simulaciones.
+        
+        \vspace{0.2cm}
+        \item \textbf{Robustez de Correlaciones:} Agrupamiento bosónico y exclusión fermiónica son \textbf{independientes de geometría}. Efecto espín es fundamental y consistente. Validado experimentalmente en átomos ultrafríos.
+        
+        \vspace{0.2cm}
+        \item \textbf{Convergencia Termodinámica:} Espectro discreto → límite continuo. Propiedades macroscópicas emergen de microscópicas correctamente (DOS universal).
+        
+        \vspace{0.2cm}
+        \item \textbf{Marco Conceptual:} Integra mecánica cuántica fundamental + física estadística + fenomenología de átomos ultrafríos. Aplicable a sistemas nanométricos y dispositivos cuánticos.
+    \end{enumerate}
+}
+
+% Slide de cierre
+\frame{
+    \begin{center}
+        {\Large \textbf{Gracias}}
+        \vspace{1cm}
+        
+        \textbf{Preguntas}
+    \end{center}
+}
+
+\end{document}

@@ -1,0 +1,21 @@
+# Python junk
+__pycache__/
+.ipynb_checkpoints/
+*.pyc
+.venv/
+.env
+
+# LaTeX junk (very important for your report folder)
+*.aux
+*.log
+*.toc
+*.synctex.gz
+*.out
+*.fdb_latexmk
+*.fls
+
+# Data/OS junk
+.DS_Store
+
+# Ignore the generated PDF version of the notebook
+legacy/*.pdf

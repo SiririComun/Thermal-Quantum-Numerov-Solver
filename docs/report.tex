@@ -1,0 +1,305 @@
+\documentclass[twocolumn,superscriptaddress,prl,10pt]{revtex4-2}
+
+\usepackage[spanish]{babel}
+\decimalpoint
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{physics}
+\usepackage{float}
+\usepackage{xcolor}
+
+%% Configuración de elegancia y compactación
+\raggedbottom                            % Permite variabilidad en altura de página (más elegante que forzar)
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}  % Espacio alrededor de figuras
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}      % Espacio entre figuras
+\setlength{\dbltextfloatsep}{10pt plus 2pt minus 2pt} % Espacio doble columna
+\setlength{\parskip}{0pt}                % Sin espacio extra entre párrafos
+\setlength{\parsep}{0pt}
+\renewcommand{\baselinestretch}{0.95}    % Ligera reducción de interlineado (elegante, no apretado)
+
+\begin{document}
+
+\setcounter{secnumdepth}{3}
+
+\title{Estudio Termodinámico de Partículas Cuánticas en Pozos de Potencial: Efectos de Temperatura, Estadística y Confinamiento}
+
+\author{Juan Jose Montoya Sánchez}
+\author{Juan Pablo Sánchez Arroyave}
+\affiliation{Instituto de Física, Universidad de Antioquia, Medellín, Colombia}
+
+\date{\today}
+
+\begin{abstract}
+En este trabajo se exploran las propiedades estadísticas y termodinámicas de partículas cuánticas confinadas en diferentes geometrías de potencial bajo la influencia de un reservorio térmico a temperatura $T$. Reproducimos los resultados de Miranda (2019) para un pozo de potencial infinito, analizando la densidad de probabilidad termalizada $P_{th}(x,t)$ y la emergencia de una capa límite térmica cerca de las paredes. Extendemos el análisis a correlaciones de dos partículas, explorando cómo el espín ($s=1$ para bosones, $s=1/2$ para fermiones) modula las correlaciones estadísticas mediante combinaciones de funciones espaciales simétricas y antisimétricas. A continuación, estudiamos la robustez de estas correlaciones bajo cambios en la geometría del confinamiento, analizando pozos de potencial finito con tres alturas de barrera diferentes (Low: $V_0=10$, Medium: $V_0=50$, High: $V_0=1000$), potenciales suaves (armónico truncado y en forma de V). Esta comparación revela la universalidad de las correlaciones: independientemente de la geometría, las diferencias entre agrupamiento bosónico y exclusión fermiónica persisten. Implementamos métodos numéricos de precisión: el método de Numerov para pozos finitos y diagonalización de matrices Hamiltonianas para potenciales arbitrarios. Analizamos sistemáticamente la convergencia de la suma térmica en función de temperatura y tipo de potencial. Finalmente, validamos nuestros resultados mediante el análisis de la densidad de estados (DOS), demostrando que el espectro discreto converge al límite termodinámico conforme el tamaño del sistema aumenta.
+\end{abstract}
+
+\maketitle
+
+\section{Introducción}
+
+El problema de una partícula cuántica confinada en una caja de potencial es fundamental en mecánica cuántica \cite{Griffiths}, proporcionando el paradigma conceptual más simple para entender cuantización, condiciones de frontera y estructura de espectros discretos. Sin embargo, la mayoría de los tratamientos pedagógicos asumen sistemas a temperatura cero. En contraste, los sistemas reales siempre interactúan con ambientes térmicos, fenómeno de relevancia central en materia condensada \cite{Pathria} y en física de átomos ultrafríos \cite{Yao2025,Kerr2024}, donde la termalización cuántica y el equilibrio estadístico determinan propiedades observables.
+
+La termalización en sistemas confinados es un problema multifacético. A nivel fundamental, cuando una partícula interactúa con un reservorio térmico, la matriz densidad adopta la forma canónica, produciendo una superposición térmica de autovalores energéticos. Miranda \cite{Miranda2019} demostró que en el pozo infinito, la distribución térmica genera una "capa límite térmica" cerca de las paredes, cuyo espesor disminuye con temperatura. Sin embargo, este análisis se limitó al caso específico del pozo de potencial infinito, dejando sin exploración la extensión a confinamientos más generales con diferentes geometrías de potencial.
+
+En los últimos años, avances experimentales en átomos ultrafríos han puesto de relieve la importancia de las correlaciones de dos partículas inducidas por estadística cuántica. Mediciones de microscopía resuelta en átomos han permitido observar directamente pares de bosones y fermiones en potenciales ópticos, revelando que las correlaciones estadísticas (agrupamiento bosónico vs exclusión de Pauli) son efectos robustos y universales \cite{Yao2025,Senaratne2021}. Simultáneamente, estudios de termodinámicas de gases cuánticos integrables, como el gas de Lieb-Liniger, han documentado cómo las propiedades térmicas emergen del espectro microscópico incluso en sistemas de tamaño moderado \cite{Kerr2024}.
+
+Estas observaciones experimentales motivan varias cuestiones teóricas fundamentales no completamente resueltas: (1) ¿Cómo modula el espín las correlaciones de dos partículas a temperatura finita? (2) ¿Son las características de termalización universales, independientes de la geometría del confinamiento, o dependen crucialmente del potencial? (3) ¿Cuál es la convergencia numérica requerida para sumas térmicas en función de temperatura y tipo de potencial? (4) ¿Cómo conecta el comportamiento microscópico finito con el límite termodinámico macroscópico?
+
+Este trabajo aborda estas brechas mediante un estudio teórico y computacional sistemático que integra perspectivas de mecánica cuántica fundamental, teoría estadística y fenomenología de sistemas ultrafríos. Comenzamos replicando el análisis de termalización en el pozo infinito para validar métodos numéricos \cite{Miranda2019}, luego extendemos sistemáticamente a pozos finitos con múltiples alturas de barrera y potenciales suaves (armónico truncado y en forma de V). Analizamos sistemas de dos partículas idénticas con estadísticas bosónica y fermiónica, incorporando explícitamente efectos de espín \cite{Griffiths}. Investigamos la universalidad de correlaciones bajo estas variaciones en geometría del confinamiento. Analizamos sistemáticamente la convergencia térmica y la Densidad de Estados, demostrando cómo el espectro discreto converge al límite termodinámico \cite{Pathria,Ashcroft}. Estos resultados son directamente relevantes para experimentos con átomos ultrafríos en redes ópticas y para comprensión fundamental de termalización en sistemas cuánticos finitos.
+
+\section{Marco Teórico y Métodos Numéricos}
+
+\subsection{Fundamentos Matemáticos y Físicos}
+
+\subsubsection{Termodinámica Cuántica: Ensamble Canónico}
+Cuando un sistema cuántico está en contacto con un baño térmico a temperatura $T$, su descripción pasa de ser un estado puro $|\psi\rangle$ a una mezcla estadística caracterizada por el ensamble canónico \cite{Pathria}. Este cambio fundamental—del estado puro al ensamble—es el mecanismo microscópico subyacente a la termalización cuántica observada tanto en sistemas confinados como en gases ultrafríos \cite{Kerr2024}. La matriz densidad del sistema es diagonal en la base de energía:
+\begin{equation}
+\hat{\rho} = \frac{1}{Z(T)} \sum_n e^{-E_n/k_B T} |n\rangle\langle n|
+\end{equation}
+donde $Z(T) = \sum_n e^{-E_n/k_B T}$ es la función de partición canónica y $k_B$ es la constante de Boltzmann. La densidad de probabilidad espacial térmica se obtiene tomando el valor esperado del proyector de posición:
+\begin{equation}
+P_{th}(x, T) = \langle x|\hat{\rho}|x\rangle = \frac{1}{Z(T)} \sum_{n=1}^{\infty} |\psi_n(x)|^2 e^{-E_n/k_B T}
+\end{equation}
+Esta ecuación describe la distribución espacial de la partícula cuando todos los estados cuánticos están accesibles con probabilidades dictadas por el factor de Boltzmann.
+
+\textbf{Aplicación al Pozo Infinito.} Para una partícula de masa $m$ confinada en una caja unidimensional $0 < x < L$ con paredes infinitamente altas, los autoestados normalizados son \cite{Griffiths}:
+\begin{equation}
+\psi_n(x) = \sqrt{\frac{2}{L}} \sin\left(\frac{n\pi x}{L}\right), \quad n = 1, 2, 3, \ldots
+\end{equation}
+con espectro de energía discreto:
+\begin{equation}
+E_n = \frac{\hbar^2 \pi^2 n^2}{2mL^2} \equiv E_1 n^2
+\end{equation}
+donde $E_1 = \frac{\hbar^2 \pi^2}{2mL^2}$ es la energía del estado fundamental. Sustituyendo en la expresión general, la densidad térmica del pozo infinito es:
+\begin{equation}
+P_{th}(x, T) = \frac{2}{LZ(T)} \sum_{n=1}^{\infty} \sin^2\left(\frac{n\pi x}{L}\right) e^{-E_n/k_B T}
+\end{equation}
+Para simplificar la notación, introducimos una temperatura adimensional \cite{Miranda2019}:
+\begin{equation}
+t \equiv \frac{k_B T}{E_1} = \frac{2mL^2 k_B T}{\hbar^2 \pi^2}
+\end{equation}
+que expresa la temperatura en unidades de la energía del estado fundamental. Con esta definición, el factor de Boltzmann se simplifica a $e^{-n^2/t}$ y la función de partición se convierte en una serie theta de Jacobi: $Z(t) = \sum_{n=1}^{\infty} e^{-n^2/t}$.
+
+\subsubsection{Estadística Cuántica de Dos Partículas}
+Para un sistema de dos partículas idénticas, la función de onda total debe satisfacer propiedades de simetría dictadas por el teorema de espín-estadística \cite{Griffiths}. La función de onda espacial conjunta debe ser simétrica para bosones o antisimétrica para fermiones:
+\begin{align}
+\Psi_B(x_1, x_2) &= \frac{1}{\sqrt{2}} [ \psi_{n_1}(x_1)\psi_{n_2}(x_2) + \psi_{n_2}(x_1)\psi_{n_1}(x_2) ] \label{eq:boson_symm}\\
+\Psi_F(x_1, x_2) &= \frac{1}{\sqrt{2}} [ \psi_{n_1}(x_1)\psi_{n_2}(x_2) - \psi_{n_2}(x_1)\psi_{n_1}(x_2) ] \label{eq:fermion_antisymm}
+\end{align}
+Estas simetrías inducen correlaciones espaciales fundamentales: los bosones se atraen estadísticamente (agrupamiento en la diagonal $x_1 = x_2$), mientras que los fermiones se repelen (exclusión de Pauli). 
+
+Cuando incluimos el grado de libertad de espín, la función de onda total (espacial $\otimes$ espín) debe tener la simetría correcta bajo intercambio de partículas. Para \textbf{bosones con espín $s=1$}, la función de onda total debe ser simétrica. Al combinar dos espines $s=1$, el espín total puede ser $S=2$ (simétrico, 5 estados), $S=1$ (simétrico, 3 estados), o $S=0$ (antisimétrico, 1 estado). Los estados con $S=2,1$ (simétricos en espín) se combinan con $\Psi_B$ (simétrica espacial), mientras que $S=0$ (antisimétrico en espín) se combina con $\Psi_F$ (antisimétrica espacial). La densidad de probabilidad total es:
+\begin{equation}
+P^{B, s=1}(x_1, x_2) = \frac{8}{9}|\Psi_B(x_1, x_2)|^2 + \frac{1}{9}|\Psi_F(x_1, x_2)|^2 \label{eq:boson_spin1}
+\end{equation}
+
+Para \textbf{fermiones con espín $s=1/2$}, la función de onda total debe ser completamente antisimétrica. Al combinar dos espines $s=1/2$, el espín total puede ser $S=0$ (singlete antisimétrico, 1 estado) o $S=1$ (triplete simétrico, 3 estados). El singlete se combina con $\Psi_B$ (simétrica espacial) y el triplete con $\Psi_F$ (antisimétrica espacial):
+\begin{equation}
+P^{F, s=1/2}(x_1, x_2) = \frac{1}{4}|\Psi_B(x_1, x_2)|^2 + \frac{3}{4}|\Psi_F(x_1, x_2)|^2 \label{eq:fermion_spin_half}
+\end{equation}
+Esta estructura permite que dos fermiones ocupen la misma posición en el estado singlete, mecanismo crucial para fenómenos como el enlace químico \cite{Griffiths}.
+
+\subsubsection{Densidad de Estados y Límite Termodinámico}
+La densidad de estados (DOS), $g(E)$, cuantifica el número de estados cuánticos disponibles en un intervalo de energía. Para una partícula libre en una dimensión, la teoría predice \cite{Ashcroft}:
+\begin{equation}
+g(E) = \frac{dN}{dE} = \frac{L}{\pi\hbar}\sqrt{\frac{m}{2E}} \propto E^{-1/2} \label{eq:dos_1d}
+\end{equation}
+El comportamiento del pozo finito converge a este límite conforme $V_0 \to \infty$ y $L \to \infty$. La función de distribución acumulada $N(E)$, que cuenta el número total de estados hasta energía $E$, escala como $N(E) \propto L\sqrt{E}$ \cite{Ashcroft}. Esta convergencia es manifestación del límite termodinámico y permite conectar propiedades microscópicas con macroscópicas.
+
+\subsection{Métodos Numéricos}
+
+\subsubsection{Método de Numerov para Pozos Finitos}
+Para potenciales complejos sin solución analítica, resolvemos numéricamente la ecuación de Schrödinger independiente del tiempo:
+\begin{equation}
+-\frac{\hbar^2}{2m} \frac{d^2\psi}{dx^2} + V(x)\psi = E\psi
+\end{equation}
+Reescrita sin el término de energía potencial, obtiene la forma $\psi'' + k^2(x)\psi = 0$ donde $k^2(x) = \frac{2m}{\hbar^2}(E - V(x))$ \cite{Numerov}. 
+
+El método de Numerov es un algoritmo de integración especializado para ecuaciones de segundo orden sin derivada primera. Produce una relación de recurrencia de cuarto orden local, $O(\delta x^6)$, superior a esquemas estándar \cite{Press}:
+\begin{equation}
+\psi_{i+1} = \frac{2(1 - \frac{5}{12}\delta x^2 k_i^2)\psi_i - (1 + \frac{1}{12}\delta x^2 k_{i-1}^2)\psi_{i-1}}{1 + \frac{1}{12}\delta x^2 k_{i+1}^2} \label{eq:numerov_recurrence}
+\end{equation}
+Implementamos esto como un problema de autovalores generalizado $\mathbf{A}\psi = \epsilon \mathbf{B}\psi$ incorporando condiciones de frontera Dirichlet ($\psi = 0$ en los extremos).
+
+\subsubsection{Diagonalización de Matrices para Potenciales Arbitrarios}
+Para potenciales suaves como el oscilador armónico truncado ($V(x) = \min[\frac{1}{2}m\omega^2 x^2, V_0]$) o el pozo en V ($V(x) = \min[\alpha|x|, V_0]$), empleamos un método algebraico directo \cite{Press}. Discretizamos el espacio en $N_x$ puntos equiespaciados con paso $\Delta x$. La derivada segunda se aproxima por diferencias finitas centradas de segundo orden:
+\begin{equation}
+\frac{d^2\psi}{dx^2}\bigg|_i \approx \frac{\psi_{i+1} - 2\psi_i + \psi_{i-1}}{(\Delta x)^2} \label{eq:finite_diff}
+\end{equation}
+Esto convierte la ecuación de Schrödinger en un problema de autovalores matricial $\mathbf{H}\psi = E\psi$, donde la matriz Hamiltoniana tridiagonal es:
+\begin{equation}
+H_{ij} = -\frac{\hbar^2}{2m(\Delta x)^2}(\delta_{i+1,j} - 2\delta_{i,j} + \delta_{i-1,j}) + V(x_i)\delta_{ij} \label{eq:hamiltonian_matrix}
+\end{equation}
+Obtenemos los primeros $k$ autovalores y autovectores usando rutinas de álgebra lineal numérica (LAPACK). Esta discretización es exacta en el límite $\Delta x \to 0$.
+
+\subsubsection{Convergencia Térmica y Criterio de Truncación}
+Para evaluar la densidad de probabilidad térmica, sumamos sobre los primeros $N$ autovalores obtenidos numéricamente. Es crucial determinar $N(T)$ tal que incluir más términos no altere significativamente el resultado. Implementamos un criterio de convergencia basado en la variación de la densidad de probabilidad:
+\begin{equation}
+\max_x \left| P_{th}^{(N)}(x, T) - P_{th}^{(N-1)}(x, T) \right| < \epsilon_{conv} \label{eq:convergence_criterion}
+\end{equation}
+con tolerancia $\epsilon_{conv} = 10^{-4}$. El número $N(T)$ crece con temperatura pero depende críticamente del tipo de potencial. El pozo infinito requiere más términos a alta $T$ debido al espaciamiento uniforme $E_n \propto n^2$. Los pozos finitos con $V_0$ bajo saturan antes al agotar sus estados ligados disponibles.
+
+\section{Resultados: Termalización en Diferentes Confinamientos}
+
+\subsection{Comparativa de Densidades Térmicas}
+
+La Figura \ref{fig:inf_fig1} presenta una comparación sistemática de la densidad de probabilidad térmica $P_{th}(x,t)$ para cuatro tipos de confinamiento con geometría de pozo cuadrado: el caso analítico infinito y tres realizaciones de pozo finito con alturas de barrera decrecientes. Esta disposición en panel permite visualizar simultáneamente el efecto de reducir $V_0$ desde el régimen pseudo-infinito ($V_0=1000$) hasta el caso de confinamiento débil ($V_0=10$).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figuresnew/1.png}
+    \caption{\textbf{Densidad Térmica $P_{th}(x,t)$ en Cuatro Casos de Confinamiento.} Panel 2×2: (superior izquierdo) Pozo infinito, (superior derecho) finito alto ($V_0=1000$), (inferior izquierdo) finito medio ($V_0=50$), (inferior derecho) finito bajo ($V_0=10$). Tres temperaturas por panel: $t=1$ (azul, línea discontinua larga), $t=10$ (naranja, línea discontinua corta), $t=50$ (verde, línea sólida).}
+    \label{fig:inf_fig1}
+\end{figure}
+
+\vspace{-0.3cm}
+La Figura \ref{fig:inf_fig1} revela varias características fundamentales de la termalización cuántica. Primero, en todos los casos, la temperatura actúa como un agente homogeneizador: a $t=1$ (cerca del estado fundamental), la distribución presenta estructura nodal característica de la autofunción de menor energía; conforme $t$ aumenta a 10 y posteriormente a 50, esta estructura se borra progresivamente, convergiendo hacia una distribución casi plana en la región central del pozo. 
+
+En el pozo infinito (panel superior izquierdo), la condición de frontera estricta $\psi(0)=\psi(L)=0$ impone una caída abrupta de la probabilidad en las paredes, definiendo una capa límite térmica cuyo espesor $d(t)$ disminuye monótonamente con la temperatura. En contraste, los pozos finitos exhiben una transición suavizada: el panel de $V_0=1000$ (superior derecho) es casi indistinguible del infinito, confirmando que esta altura de barrera es efectivamente "pseudo-infinita" para las energías térmicas consideradas. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figuresnew/2.png}
+    \caption{\textbf{Capa Límite Térmica: Extensión y Tunelamiento.} Posición de la capa límite térmica $d(t)$ en función de la temperatura adimensional $t$ para cuatro tipos de confinamiento (líneas con marcadores). Valores positivos indican que la frontera se encuentra dentro de la región nominal de confinamiento; valores negativos (fuera del eje cero) indican que la capa límite se extiende fuera de la caja, evidencia directa de tunelamiento cuántico.}
+    \label{fig:inf_fig1b}
+\end{figure}
+
+Sin embargo, al reducir $V_0$ a 50 (panel inferior izquierdo), comienza a observarse una extensión notable de la probabilidad hacia las regiones $x<0$ y $x>\pi$, indicando una expansión apreciable de la capa límite térmica. Este efecto se vuelve dramático en el caso $V_0=10$ (panel inferior derecho), donde la capa límite térmica penetra profundamente en las barreras y, como se evidencia en la Figura \ref{fig:inf_fig1b}, adopta valores negativos. Esta negatividad de la capa límite es el indicador preciso de tunelamiento: la frontera "efectiva" de la probabilidad se encuentra fuera de la caja nominalmente definida. El efecto es especialmente pronunciado a temperaturas bajas donde los estados ligados de menor energía tienen mayor peso estadístico. A alta temperatura ($t=50$), todos los casos convergen hacia distribuciones más uniformes, aunque el pozo finito bajo mantiene colas extendidas incluso en este límite casi clásico, con la capa límite aún exhibiendo una posición desplazada que refleja el tunelamiento residual.
+
+\subsection{Análisis de Convergencia}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figuresnew/3.png}
+    \caption{\textbf{Convergencia de la Suma Térmica.} Número de términos $N$ requeridos para alcanzar convergencia en función de la temperatura adimensional $t$ para cuatro tipos de potencial.}
+    \label{fig:convergence}
+\end{figure}
+
+La Figura \ref{fig:convergence} revela una característica importante de la termalización: el número de estados necesarios crece con la temperatura, pero la tasa de crecimiento depende crucialmente de la estructura del espectro. Los sistemas con potencial más alto ($V_0$ grande o infinito) convergen con menos términos porque su espaciamiento de niveles es mayor, limitando la cantidad de estados térmicamente accesibles para una temperatura dada. En contraste, los pozos finitos con $V_0$ bajo requieren más términos porque su espectro comprimido permite que el factor de Boltzmann distribuya peso significativo sobre muchos niveles antes de saturar.
+
+\subsection{Correlaciones de Dos Partículas}
+
+Para visualizar las correlaciones espaciales inducidas por la estadística cuántica, empleamos mapas de calor bidimensionales de la densidad de probabilidad conjunta $P(x_1, x_2)$ para pares de estados específicos. Esta representación permite una comparación directa entre el pozo infinito (confinamiento estricto) y el pozo finito bajo (con tunelamiento significativo), facilitando la identificación cuantitativa de estructuras características: máxima probabilidad en la diagonal $x_1=x_2$ para bosones (atracción estadística efectiva) y anulación estricta en la diagonal para fermiones (exclusión de Pauli). 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figuresnew/4.png}
+    \caption{\textbf{Bosones en Pozos Cuadrados: Mapas de Calor Comparativos 2×2.} Filas: estados $(n_1=1, n_2=1)$ (superior) y $(n_1=1, n_2=5)$ (inferior). Columnas: pozo infinito (izquierda) y finito bajo $V_0=10$ (derecha). Líneas blancas punteadas marcan paredes nominales.}
+    \label{fig:inf_fig2}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figuresnew/5.png}
+    \caption{\textbf{Fermiones en Pozos Cuadrados: Mapas de Calor Comparativos 2×2.} Filas: estados $(n_1=1, n_2=2)$ (superior) y $(n_1=1, n_2=5)$ (inferior). Columnas: pozo infinito (izquierda) y finito bajo $V_0=10$ (derecha). Líneas blancas punteadas marcan paredes nominales.}
+    \label{fig:inf_fig3}
+\end{figure}
+
+Si bien en el notebook computacional adjunto se presentan también versiones tridimensionales de estas visualizaciones que permiten apreciar la topografía completa de $P(x_1,x_2)$, en este documento optamos por los mapas de calor bidimensionales por varias razones: (1) facilitan la comparación lado a lado de múltiples casos en formato compacto, (2) las escalas de color normalizadas permiten cuantificar diferencias de probabilidad con mayor precisión que las perspectivas 3D, (3) la inclusión de líneas de referencia (paredes del pozo) es más clara en 2D, y (4) la impresión en blanco y negro mantiene la legibilidad mediante gradientes de intensidad.
+
+\subsection{Promedios Térmicos y Efecto del Espín}
+
+Las Figuras \ref{fig:inf_fig2} y \ref{fig:inf_fig3} ilustraron las correlaciones para pares de estados puros específicos $(n_1, n_2)$. Para describir un sistema en equilibrio térmico a temperatura finita, calculamos el promedio estadístico sobre todos los pares de estados accesibles, ponderados por el factor de Boltzmann $e^{-(E_{n_1}+E_{n_2})/k_BT}$. La Figura \ref{fig:inf_fig4} presenta estos promedios térmicos a temperatura moderada $t=10$ en un formato de grid 2×2 que compara, para cada estadística, el caso infinito frente al finito de barrera baja.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figuresnew/6.png}
+    \caption{\textbf{Promedios Térmicos en Pozos Cuadrados ($t=10$): Grid 2×2.} Filas: bosones (superior) y fermiones sin espín (inferior). Columnas: pozo infinito (izquierda) y finito bajo $V_0=10$ (derecha).}
+    \label{fig:inf_fig4}
+\end{figure}
+
+Los promedios térmicos revelan que, a temperatura finita, las correlaciones características de cada estadística (agrupamiento bosónico vs separación fermiónica) se suavizan pero persisten. A $t=10$, el factor de Boltzmann favorece estados excitados, diluyendo la estructura nodal de los mapas de estados puros, pero la diagonal bosónica y la antidiagonal fermiónica permanecen visibles.
+
+El efecto del espín modula dramáticamente estas correlaciones. La Figura \ref{fig:inf_fig5} resume en un grid 2×2 la comparación de estadísticas bosónicas y fermiónicas para sistemas con y sin espín. Para bosones con espín $s=1$ (ecuación \ref{eq:boson_spin1}), la probabilidad es una mezcla $\frac{8}{9}|\Psi_B|^2 + \frac{1}{9}|\Psi_F|^2$, donde la componente antisimétrica espacial (acoplada al estado de espín antisimétrico $S=0$) representa solo el 11\% de la densidad total. Para fermiones con espín $s=1/2$ (ecuación \ref{eq:fermion_spin_half}), la fórmula $\frac{1}{4}|\Psi_B|^2 + \frac{3}{4}|\Psi_F|^2$ refleja que el estado singlete (simétrico espacial) permite ocupación en la diagonal $x_1=x_2$, suavizando la exclusión de Pauli observada para fermiones sin espín.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figuresnew/7.png}
+    \caption{\textbf{Efecto del Espín en Pozos Cuadrados: Bosones y Fermiones (Grid 2×2).} Filas: bosones (superior) y fermiones (inferior). Columnas: sin espín (izquierda) y con espín 1/2 (derecha). Paneles internos comparan pozo infinito vs finito bajo $V_0=10$.}
+    \label{fig:inf_fig5}
+\end{figure}
+
+\section{Universalidad: Potenciales Suaves}
+
+Para evaluar si las correlaciones estadísticas observadas dependen de la geometría del confinamiento, extendimos el análisis a dos potenciales "suaves": el oscilador armónico truncado ($V(x) = \min[\frac{1}{2}m\omega^2 x^2, V_0]$) y el pozo en forma de V ($V(x) = \min[\alpha|x|, V_0]$). Ambos casos se resolvieron por diagonalización matricial. Las autofunciones difieren (Hermite-Gaussianas para el armónico, tipo Airy para el V), pero el comportamiento estadístico que muestran los mapas de calor es cualitativamente idéntico al del pozo cuadrado.
+
+\subsection{Correlaciones Bosónicas en Potenciales Suaves}
+
+La Figura \ref{fig:soft_comparison_thermal} presenta mapas de calor de correlaciones bosónicas para ambos potenciales suaves, revelando que la atracción estadística (máximo en la diagonal $x_1=x_2$) es independiente de la geometría del confinamiento.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figuresnew/8.png}
+    \caption{\textbf{Bosones en Potenciales Suaves: Comparativa 2×2.} Filas: estados $(n_1=1, n_2=1)$ (superior) y $(n_1=1, n_2=5)$ (inferior). Columnas: potencial armónico (izquierda) y pozo en V (derecha).}
+    \label{fig:soft_comparison_thermal}
+\end{figure}
+
+\subsection{Correlaciones de Dos Partículas: Robustez de la Estadística}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figuresnew/9.png}
+    \caption{\textbf{Fermiones en Potenciales Suaves: Comparativa 2×2.} Filas: estados $(n_1=1, n_2=2)$ (superior) y $(n_1=1, n_2=5)$ (inferior). Columnas: potencial armónico (izquierda) y pozo en V (derecha).}
+    \label{fig:soft_fig2}
+\end{figure}
+
+A pesar de las diferencias en las autofunciones, las correlaciones estadísticas fundamentales se preservan con notable fidelidad. Las Figuras \ref{fig:soft_fig2} y \ref{fig:soft_fig3} presentan comparativas directas entre armónico y V para bosones y fermiones respectivamente.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figuresnew/10.png}
+    \caption{\textbf{Promedios Térmicos en Potenciales Suaves ($t=10$): Grid 2×2.} Filas: bosones (superior) y fermiones sin espín (inferior). Columnas: potencial armónico (izquierda) y pozo en V (derecha).}
+    \label{fig:soft_fig3}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figuresnew/11.png}
+    \caption{\textbf{Efecto del Espín en Potenciales Suaves: Bosones y Fermiones (Grid 2×2).} Filas: bosones (superior) y fermiones (inferior). Columnas: sin espín (izquierda, función espacial pura) y con espín 1/2 (derecha, mezcla 1/4 singlete + 3/4 triplete).}
+    \label{fig:soft_fig4}
+\end{figure}
+
+\section{Densidad de Estados y Límite Termodinámico}
+
+Validamos nuestras simulaciones numéricas analizando la Densidad de Estados (DOS) mediante un análisis sistemático en cuatro perspectivas complementarias, organizadas en un panel 2×2 que permite visualizar tanto la dependencia con la altura de barrera como con el tamaño del sistema.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figuresnew/12.png}
+    \caption{\textbf{Análisis de Densidad de Estados: Panel 2×2.} Superior izquierda: escalera $N(E)$ para diferentes $V_0$. Superior derecha: escalera $N(E)$ para diferentes anchos $L$. Inferior izquierda: densidad discreta $\rho(E)$ vs predicción analítica. Inferior derecha: DOS analítica para diferentes anchos.}
+    \label{fig:dos_panel}
+\end{figure}
+
+La Figura \ref{fig:dos_panel} demuestra que, para anchos $L \gg 1$ y alturas $V_0 \gg E_{\text{típica}}$, los autovalores del pozo finito colapsan sobre la curva teórica del pozo infinito, recuperando el límite de partícula libre en el continuo. El panel superior izquierdo revela cómo el incremento de $V_0$ densifica el espectro discreto y acerca la escalera de estados a la predicción analítica. El panel inferior izquierdo muestra explícitamente la convergencia de la DOS numérica (obtenida por binning de autovalores) hacia la función $\rho(E) \propto E^{-1/2}$, característica del gas ideal 1D.
+
+\section{Conclusiones}
+
+Este estudio nos ha permitido explorar la termodinámica de sistemas cuánticos confinados como sistema modelo para comprender mecanismos fundamentales de termalización cuántica. Mediante métodos numéricos de alta precisión (Numerov \cite{CarusoOguri2014}, diagonalización matricial \cite{Press}), hemos investigado cómo la temperatura modula propiedades estadísticas en sistemas de una y dos partículas, extendiendo resultados previos en el pozo infinito \cite{Miranda2019} hacia una comprensión más general de universalidad y robustez.
+
+\textbf{Termalización y Homogeneización Térmica.} En primer lugar, confirmamos que la temperatura actúa como agente homogeneizador de la densidad de probabilidad, resultado consistente con teoría del ensamble canónico \cite{Pathria}. A bajas temperaturas domina la estructura nodal del estado base; al aumentar $T$, la superposición térmica de estados excitados induce convergencia hacia distribuciones casi uniformes. Este comportamiento es universal: se observa en todos los tipos de confinamiento estudiados (infinito, finito, armónico, en V). Sin embargo, los detalles microscópicos importan cuantitativamente: la Figura \ref{fig:convergence} reveló que la convergencia de la suma térmica requiere diferentes números de estados según la arquitectura del potencial, observación crítica para simulaciones numéricas en materia condensada.
+
+\textbf{Robustez de Correlaciones Estadísticas.} En segundo lugar, nuestro análisis de dos partículas (Figuras \ref{fig:inf_fig2}–\ref{fig:soft_fig4}) demuestra que las correlaciones bosónicas (agrupamiento en $x_1=x_2$) y fermiónicas (exclusión en la diagonal) son efectos robustos e independientes de geometría. Específicamente, la comparación sistemática entre pozos cuadrados (Figuras \ref{fig:inf_fig2}–\ref{fig:inf_fig5}) y potenciales suaves (Figuras \ref{fig:soft_comparison_thermal}–\ref{fig:soft_fig4}) revela que, a pesar de las diferencias fundamentales en las autofunciones espaciales (senos en pozos cuadrados vs Hermite-Gaussianas y funciones de Airy en potenciales suaves), las estructuras de correlación estadística son idénticas en forma: bosones exhiben máximos en la diagonal para todos los potenciales, fermiones muestran exclusión universal en la diagonal, y el efecto del espín modula estas correlaciones de manera consistente. Este hallazgo conecta con observaciones experimentales recientes en átomos ultrafríos \cite{Yao2025,Senaratne2021}, donde mediciones directas de pares revelan que la estadística cuántica genera firmas universales incluso en sistemas de tamaño moderado \cite{Venu2022}. El papel del espín es fundamental: para fermiones $s=1/2$, la mezcla $\frac{1}{4}|\Psi_B|^2 + \frac{3}{4}|\Psi_F|^2$ permite ocupación del singlete en la diagonal, suavizando la exclusión de Pauli pura, mecanismo físico subyacente a enlace químico y emparejamiento electrónico.
+
+\textbf{Convergencia Termodinámica.} El análisis de la Densidad de Estados (Figura \ref{fig:dos_panel}) validó la convergencia del espectro discreto hacia el límite continuo, demostrando que propiedades macroscópicas emergen correctamente de descripciones microscópicas \cite{Pathria,Ashcroft,Kerr2024}. Los pozos finitos con $V_0$ moderado requieren tratamiento numérico cuidadoso: aunque individualmente finitos, el análisis estadístico de DOSs múltiples revela estructura universal $g(E) \propto E^{-1/2}$ característica de sistemas libres 1D.
+
+\textbf{Significado Más Amplio.} Este trabajo contribuye a comprensión fundamental de cómo emergen propiedades termodinámicas macroscópicas de sistemas cuánticos microscópicos, pregunta central en física estadística cuántica \cite{Kerr2024}. La metodología—combinar análisis analítico con métodos numéricos de precisión, validar mediante DOS, estudiar universalidad bajo variaciones geométricas—es aplicable a sistemas nanométricos, dispositivos cuánticos, y experimentos de átomos ultrafríos, donde confinamiento y temperatura son parámetros controlables.
+
+En conjunto, este trabajo establece un marco computacional y conceptual para el estudio de termalización cuántica en sistemas confinados que integra perspectivas de mecánica cuántica fundamental, física estadística, y fenomenología experimental en átomos ultrafríos, proporcionando fundaciones para investigaciones posteriores en materia condensada y sistemas cuánticos nanométricos.
+
+\begin{thebibliography}{99}
+\bibitem{Miranda2019} E. N. Miranda, \textit{Where are the particles when the box is hot?}, Eur. J. Phys. 40, 065401 (2019).
+\bibitem{Griffiths} D. J. Griffiths, \textit{Introduction to Quantum Mechanics}, Cambridge University Press (2016).
+\bibitem{Pathria} R. K. Pathria \& P. D. Beale, \textit{Statistical Mechanics}, Academic Press (2011).
+\bibitem{Numerov} B. V. Numerov, Mon. Not. R. Astron. Soc. 84, 592 (1924).
+\bibitem{CarusoOguri2014} F. Caruso \& A. Oguri, \textit{Numerov method applied to the Schrödinger equation: A pedagogical introduction}, Revista de Enseñanza de la Física 27, 5-16 (2014).
+\bibitem{Ashcroft} N. W. Ashcroft \& N. D. Mermin, \textit{Solid State Physics}, Harcourt College Publishers (1976).
+\bibitem{Press} W. H. Press et al., \textit{Numerical Recipes: The Art of Scientific Computing}, Cambridge University Press (2007).
+\bibitem{Yao2025} H. Yao, F. Chevy, C. Lannert, P. Zoller, \& Y. Castin, \textit{Measuring pair correlations in Bose and Fermi gases via atom-resolved microscopy}, Phys. Rev. Lett. 134, 183402 (2025).
+\bibitem{Kerr2024} M. L. Kerr, G. De Rosi, \& K. V. Kheruntsyan, \textit{Analytic thermodynamic properties of the Lieb-Liniger gas}, SciPost Phys. Core 7, 047 (2024).
+\bibitem{Senaratne2021} R. Senaratne, D. Cavazos-Cavazos, S. Wang, F. He, Y.-T. Chang, A. Kafle, H. Pu, X.-W. Guan, \& R. G. Hulet, \textit{Spin-charge separation in a 1D Fermi gas with tunable interactions}, Science 373, 1129-1133 (2021).
+\bibitem{Venu2022} V. Venu, P. Xu, M. Mamaev, F. Corapi, T. Bilitewski, J. P. D'Incao, C. J. Fujiwara, A. M. Rey, \& J. H. Thywissen, \textit{Observation of unitary p-wave interactions between fermions in an optical lattice}, Nature 613, 262-267 (2023).
+\end{thebibliography}
+
+\end{document}
