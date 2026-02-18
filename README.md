@@ -1,10 +1,11 @@
 # Thermal-Quantum-Numerov-Solver
 
-**[Leer en Español](README.es.md)**
-
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![University](https://img.shields.io/badge/University-UdeA-green)](https://www.udea.edu.co/)
+[![Documentation](https://img.shields.io/badge/docs-GitHub_Pages-brightgreen)](https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/)
+
+**[Leer en Español](README.es.md)** | **[Explore Live Documentation](https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/)**
 
 A high-performance computational physics engine designed to solve the **1D Time-Independent Schrödinger Equation** and simulate **Identical Particle Thermalization** in a Canonical Ensemble.
 
@@ -15,7 +16,7 @@ A high-performance computational physics engine designed to solve the **1D Time-
 This project was originally developed for the **Statistical Physics** course at the **Universidad de Antioquia (UdeA)**. It implements a high-order numerical solver to explore how quantum particles behave under different potential constraints and thermal conditions.
 
 ### Scientific Core:
-- **Numerical Method:** Matrix Numerov (O(dx⁴) accuracy) for solving Eigenvalue problems.
+- **Numerical Method:** Matrix Numerov (**$O(dx^4)$ global accuracy**) for solving Eigenvalue problems.
 - **Statistical Framework:** Canonical Ensemble (Boltzmann distribution) to calculate thermal densities.
 - **Identical Particles:** Spatial symmetrization and antisymmetrization for Bosons and Fermions.
 - **Spin Statistics:** Implementation of Spin-1/2 (Fermionic) and Spin-1 (Bosonic) mixtures.
@@ -25,16 +26,17 @@ This project was originally developed for the **Statistical Physics** course at 
 
 ## 🛠 The Refactoring Journey (Software Architecture Focus)
 
-The primary goal of this repository is to demonstrate the transition from **Scientific Prototyping** to **Professional Software Architecture**. 
-
-I am currently refactoring the original procedural notebook into a modular, script-based Python library, applying **SOLID principles**, **OOP Design Patterns**, and industry-standard practices.
+The primary goal of this repository is to demonstrate the transition from **Scientific Prototyping** to **Professional Software Architecture**. I have refactored a legacy procedural research notebook into a modular, production-grade Python library.
 
 ### Architectural Improvements:
 - **Procedural ➔ OOP:** Encapsulating physics entities (Potentials, Solvers, States) into clean class hierarchies.
-- **Dependency Injection:** Decoupling the Physics Solver from specific potential implementations.
-- **Type Safety:** Full integration of Python Type Hinting for robust scientific computing.
-- **Modularity:** Strict separation of concerns between the Physics Engine, Data Models, and Visualization logic.
-- **Maintainability:** Transitioning from "linear spaghetti" notebooks to an importable Python package.
+- **Abstraction & Polymorphism:** Using **Abstract Base Classes (ABCs)** to define "contracts" for both Potentials and Solvers, making the engine algorithm-agnostic.
+- **Dependency Inversion (DIP):** Decoupling the high-level simulation logic from low-level constants and specific numerical implementations.
+- **Immutability:** Implementing **Frozen Dataclasses** for physical and numerical configurations to ensure scientific reproducibility.
+- **Documentation as Code (DaC):** Using **Sphinx with Napoleon** to generate a professional API website that renders LaTeX equations via MathJax.
+
+### 🤖 AI-Assisted Architecture
+This project utilizes a custom **Senior Research Architect** agent (configured in `.github/agents/`). This agent is designed to enforce **SOLID principles**, strict **Type Hinting**, and **Google-style documentation**, ensuring the transition from research to production maintains the highest engineering standards.
 
 ---
 
@@ -42,16 +44,20 @@ I am currently refactoring the original procedural notebook into a modular, scri
 
 ```text
 ├── legacy/              # Original procedural research notebook (The Baseline)
-├── docs/                # Scientific Paper (LaTeX) and Class Presentation
-├── src/                 # [In Progress] New modular OOP Library
-│   ├── core/            # Physics solvers and mathematical logic
-│   ├── models/          # Data classes and physics entities (Potentials, States)
+├── research_output/     # Academic Paper (LaTeX), original PDFs, and presentations
+├── docs/                # [Deployed] Compiled HTML documentation website
+├── docs_site/           # Source files for the Sphinx documentation engine
+├── src/                 # Modular OOP Library
+│   ├── core/            # Physics Engine (BaseSolver, Numerov Engine)
+│   ├── models/          # Data Models (Potentials, Configs, States)
 │   └── visualization/   # Professional plotting and 3D rendering utilities
-├── tests/               # Unit tests for physics validation
-├── README.md            # Project documentation
+├── .github/agents/      # Custom AI Architect Agent configurations
+├── .gitignore           # Multi-language (Python/LaTeX) hygiene rules
+├── README.md            # Project documentation (English)
+├── README.es.md         # Project documentation (Spanish)
 └── requirements.txt     # Reproducibility manifest
-
 ```
+
 ---
 
 ## 🚀 Getting Started
@@ -60,24 +66,20 @@ I am currently refactoring the original procedural notebook into a modular, scri
 - Python 3.10+
 - Virtual Environment (recommended)
 
-### Installation
-1. Clone the repository:
+### Installation & Build
+1. Clone the repository and setup environment:
    ```bash
-   git clone https://github.com/SiririComun/HotBox-Quantum-Sim.git
-   cd HotBox-Quantum-Sim
-   ```
-2. Create and activate a virtual environment:
-   ```bash
+   git clone https://github.com/SiririComun/Thermal-Quantum-Numerov-Solver.git
+   cd Thermal-Quantum-Numerov-Solver
    python -m venv .venv
-   # Windows:
-   source .venv/Scripts/activate
-   # macOS/Linux:
-   source source .venv/bin/activate
-   ```
-3. Install dependencies:
-   ```bash
+   source .venv/bin/activate  # Or .venv\Scripts\activate on Windows
    pip install -r requirements.txt
    ```
+2. Build the documentation locally:
+   ```bash
+   sphinx-build -b html docs_site/source docs
+   ```
+
 ---
 
 ## 🎓 Credits
@@ -86,7 +88,3 @@ I am currently refactoring the original procedural notebook into a modular, scri
 - **Juan Montoya** - [@Juanj27](https://github.com/Juanj27)
 
 Developed as part of the Statistical Physics course at the **Universidad de Antioquia (UdeA)**, Medellín, Colombia. Refactored as a personal project to bridge the gap between Computational Physics and Professional Software Engineering.
-
-## 🤖 AI-Assisted Architecture
-
-This project utilizes a custom **Senior Research Architect** agent (configured in `.github/agents/`). This agent is designed to enforce **SOLID principles**, strict **Type Hinting**, and **Google-style documentation**, ensuring the transition from research to production maintains the highest engineering standards.
