@@ -86,3 +86,7 @@ I am currently refactoring the original procedural notebook into a modular, scri
 - **Juan Montoya** - [@Juanj27](https://github.com/Juanj27)
 
 Developed as part of the Statistical Physics course at the **Universidad de Antioquia (UdeA)**, Medellín, Colombia. Refactored as a personal project to bridge the gap between Computational Physics and Professional Software Engineering.
+
+## 🤖 AI-Assisted Architecture
+
+This project utilizes a custom **Senior Research Architect** agent (configured in `.github/agents/`). This agent is designed to enforce **SOLID principles**, strict **Type Hinting**, and **Google-style documentation**, ensuring the transition from research to production maintains the highest engineering standards.

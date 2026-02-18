@@ -88,3 +88,7 @@ Actualmente, estoy refactorizando el cuaderno (notebook) procedimental original 
 
 Desarrollado como parte del curso de Física Estadística en la **Universidad de Antioquia (UdeA)**, Medellín, Colombia. Refactorizado como un proyecto personal para cerrar la brecha entre la Física Computacional y la Ingeniería de Software Profesional.
 
+## 🤖 Arquitectura asistida por IA
+
+Este proyecto utiliza un agente **Senior Research Architect** personalizado (configurado en `.github/agents/`). Este agente está diseñado para aplicar los **principios SOLID**, el **Type Hinting** estricto y la **documentación al estilo de Google**, lo que garantiza que la transición de la investigación a la producción mantenga los más altos estándares de ingeniería.
+
