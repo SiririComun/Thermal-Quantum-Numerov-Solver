@@ -1,0 +1,676 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.models.potentials &mdash; Thermal-Quantum-Numerov-Solver 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Thermal-Quantum-Numerov-Solver
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Thermal-Quantum-Numerov-Solver</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.models.potentials</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.models.potentials</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Abstract base class and concrete implementations for 1D quantum potentials.</span>
+
+<span class="sd">This module defines the ``BasePotential`` interface and four concrete</span>
+<span class="sd">subclasses that faithfully reproduce the potential functions found in</span>
+<span class="sd">``legacy/research_prototype.ipynb``:</span>
+
+<span class="sd">- :class:`InfiniteSquareWell` — Analytical infinite-barrier box.</span>
+<span class="sd">- :class:`FiniteSquareWell`   — Flat-bottom well with finite barriers.</span>
+<span class="sd">- :class:`HarmonicPotential`  — Truncated harmonic oscillator (parabolic).</span>
+<span class="sd">- :class:`VShapedPotential`   — Truncated V-shape (linear) potential.</span>
+
+<span class="sd">All subclasses accept a :class:`~src.models.config.PhysicsConfig` object</span>
+<span class="sd">for their physical constants, enforcing Dependency Injection and eliminating</span>
+<span class="sd">global-constant coupling.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.models.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">PhysicsConfig</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Abstract Base Class</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="BasePotential">
+<a class="viewcode-back" href="../../../index.html#src.models.potentials.BasePotential">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BasePotential</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract interface for all 1D quantum potential definitions.</span>
+
+<span class="sd">    Every potential that participates in the Numerov eigenvalue pipeline must</span>
+<span class="sd">    implement this contract.  The :class:`~src.core.numerov_solver.NumerovSolver`</span>
+<span class="sd">    depends *only* on this interface, so new geometries (e.g. a double well)</span>
+<span class="sd">    can be added in a new subclass without ever modifying the solver — in</span>
+<span class="sd">    strict compliance with the Open-Closed Principle.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config: Frozen dataclass holding the dimensionless physical constants</span>
+<span class="sd">            (``hbar``, ``mass``, ``kb``, ``well_width``) used throughout the</span>
+<span class="sd">            simulation.  Defaults to the standard reduced-unit set</span>
+<span class="sd">            (``hbar=1``, ``mass=0.5``, ``L=pi``) that makes the infinite-well</span>
+<span class="sd">            spectrum satisfy :math:`E_n = n^2`.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        config: Read-only reference to the injected :class:`PhysicsConfig`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">PhysicsConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stores the injected physics configuration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config: Physics constants dataclass.  When ``None``, the standard</span>
+<span class="sd">                dimensionless defaults are used automatically.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">:</span> <span class="n">PhysicsConfig</span> <span class="o">=</span> <span class="n">config</span> <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">PhysicsConfig</span><span class="p">()</span>
+
+    <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="c1"># Public read-only property</span>
+    <span class="c1"># ------------------------------------------------------------------</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PhysicsConfig</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;PhysicsConfig: The injected physics constants, read-only.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span>
+
+    <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="c1"># Abstract contract</span>
+    <span class="c1"># ------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="BasePotential.evaluate">
+<a class="viewcode-back" href="../../../index.html#src.models.potentials.BasePotential.evaluate">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluates the potential energy :math:`V(x)` at each grid point.</span>
+
+<span class="sd">        This is the primary contract method consumed by the Numerov solver.</span>
+<span class="sd">        All values are returned in dimensionless energy units of :math:`E_1`,</span>
+<span class="sd">        where :math:`E_1 = \\hbar^2 / (2m)` with the defaults ``hbar=1``,</span>
+<span class="sd">        ``mass=0.5``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: 1D array of spatial coordinates in dimensionless length units</span>
+<span class="sd">                (e.g. :math:`x/L` or literal position when :math:`L = \\pi`).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            1D float64 array with the same shape as ``x`` containing</span>
+<span class="sd">            :math:`V(x)` values.  Barrier regions may contain ``np.inf``</span>
+<span class="sd">            for infinite-wall geometries.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="BasePotential.get_domain">
+<a class="viewcode-back" href="../../../index.html#src.models.potentials.BasePotential.get_domain">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the recommended spatial domain :math:`[x_{min}, x_{max}]`.</span>
+
+<span class="sd">        The Numerov solver calls this method to build the spatial grid without</span>
+<span class="sd">        any hardcoded geometry knowledge.  The domain should comfortably</span>
+<span class="sd">        contain both the classically allowed region and (for finite barriers)</span>
+<span class="sd">        the evanescent tunnelling tails.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A ``(x_min, x_max)`` tuple in dimensionless length units.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            A finite well of width :math:`L = \\pi` returns::</span>
+
+<span class="sd">                &gt;&gt;&gt; well = FiniteSquareWell(v0=10.0, width=math.pi)</span>
+<span class="sd">                &gt;&gt;&gt; well.get_domain()</span>
+<span class="sd">                (-1.5707963267948966, 4.71238898038469)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+    <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="c1"># Concrete helpers</span>
+    <span class="c1"># ------------------------------------------------------------------</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns an unambiguous string representation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A string in the format ``ClassName(config=&lt;PhysicsConfig&gt;)``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(config=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="si">!r}</span><span class="s2">)&quot;</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Concrete Implementations</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="InfiniteSquareWell">
+<a class="viewcode-back" href="../../../index.html#src.models.potentials.InfiniteSquareWell">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">InfiniteSquareWell</span><span class="p">(</span><span class="n">BasePotential</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Infinite square-well potential with exact Dirichlet boundary conditions.</span>
+
+<span class="sd">    The potential is defined as:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        V(x) =</span>
+<span class="sd">        \\begin{cases}</span>
+<span class="sd">            0       &amp; \\text{if } 0 \\le x \\le L \\\\</span>
+<span class="sd">            +\\infty &amp; \\text{otherwise}</span>
+<span class="sd">        \\end{cases}</span>
+
+<span class="sd">    where :math:`L` = ``config.well_width`` (default :math:`\\pi`).</span>
+
+<span class="sd">    This geometry has an exact analytical eigenspectrum given by</span>
+<span class="sd">    :math:`E_n = n^2` in the dimensionless unit system (``hbar=1``,</span>
+<span class="sd">    ``mass=0.5``, :math:`L=\\pi`), which is used as the reference baseline</span>
+<span class="sd">    throughout the project.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config: Physics constants.  Reads ``well_width`` to locate the right</span>
+<span class="sd">            wall of the box.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; well = InfiniteSquareWell()</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; x = np.array([-0.5, 0.5, np.pi / 2, np.pi, np.pi + 0.1])</span>
+<span class="sd">        &gt;&gt;&gt; well.evaluate(x)</span>
+<span class="sd">        array([inf,  0.,  0.,  0., inf])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="InfiniteSquareWell.evaluate">
+<a class="viewcode-back" href="../../../index.html#src.models.potentials.InfiniteSquareWell.evaluate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns :math:`V(x)` with :math:`+\\infty` walls at :math:`x=0` and :math:`x=L`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: 1D array of spatial coordinates in dimensionless length units.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Float64 array of the same shape as ``x``.  Values outside</span>
+<span class="sd">            :math:`[0, L]` are set to ``np.inf``; values inside are ``0.0``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">L</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">well_width</span>
+        <span class="n">V</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">inside</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">L</span><span class="p">)</span>
+        <span class="n">V</span><span class="p">[</span><span class="n">inside</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">return</span> <span class="n">V</span></div>
+
+
+<div class="viewcode-block" id="InfiniteSquareWell.get_domain">
+<a class="viewcode-back" href="../../../index.html#src.models.potentials.InfiniteSquareWell.get_domain">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns :math:`[0, L]` — the exact physical domain of the box.</span>
+
+<span class="sd">        The solver requires Dirichlet conditions at both ends, so no external</span>
+<span class="sd">        margin is needed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The tuple ``(0.0, well_width)``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">well_width</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="FiniteSquareWell">
+<a class="viewcode-back" href="../../../index.html#src.models.potentials.FiniteSquareWell">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FiniteSquareWell</span><span class="p">(</span><span class="n">BasePotential</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finite square-well potential with flat barriers.</span>
+
+<span class="sd">    Faithfully reproduces ``get_potential(x, V0, well_width)`` from</span>
+<span class="sd">    ``legacy/research_prototype.ipynb``.</span>
+
+<span class="sd">    The potential is defined as:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        V(x) =</span>
+<span class="sd">        \\begin{cases}</span>
+<span class="sd">            0    &amp; \\text{if } 0 \\le x \\le w \\\\</span>
+<span class="sd">            V_0  &amp; \\text{otherwise}</span>
+<span class="sd">        \\end{cases}</span>
+
+<span class="sd">    where :math:`w` is the ``width`` parameter and :math:`V_0` is the</span>
+<span class="sd">    barrier height.</span>
+
+<span class="sd">    The returned domain adds a half-width margin on the left and a</span>
+<span class="sd">    full-width margin on the right — identical to the legacy constants</span>
+<span class="sd">    ``X_MIN = -L/2``, ``X_MAX = 3L/2`` — to capture the evanescent</span>
+<span class="sd">    tunnelling tails that extend into the barrier region.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        v0: Barrier height in dimensionless energy units of :math:`E_1`.</span>
+<span class="sd">            The legacy study uses ``v0 ∈ {10, 50, 1000}``.</span>
+<span class="sd">        width: Well width in dimensionless length units.  Defaults to</span>
+<span class="sd">            ``config.well_width`` (i.e. :math:`\\pi`) when ``None``.</span>
+<span class="sd">        config: Physics constants.  Reads ``well_width`` as the fallback</span>
+<span class="sd">            when ``width`` is not provided.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If ``v0 &lt; 0`` or ``width &lt;= 0``.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; well = FiniteSquareWell(v0=10.0)</span>
+<span class="sd">        &gt;&gt;&gt; x = np.array([-0.5, 0.5, np.pi / 2, np.pi, np.pi + 0.5])</span>
+<span class="sd">        &gt;&gt;&gt; well.evaluate(x)</span>
+<span class="sd">        array([10. ,  0. ,  0. ,  0. , 10. ])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">v0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">PhysicsConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialises the finite square well.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            v0: Barrier height :math:`V_0 \\ge 0`.</span>
+<span class="sd">            width: Well width.  Defaults to ``config.well_width`` when</span>
+<span class="sd">                ``None``.</span>
+<span class="sd">            config: Physics constants dataclass.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If ``v0 &lt; 0`` or the resolved ``width &lt;= 0``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">v0</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Barrier height v0 must be non-negative, got </span><span class="si">{</span><span class="n">v0</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="n">resolved_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">width</span> <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">well_width</span>
+        <span class="k">if</span> <span class="n">resolved_width</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Well width must be positive, got </span><span class="si">{</span><span class="n">resolved_width</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">v0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">resolved_width</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">v0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Barrier height in dimensionless energy units.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Well width in dimensionless length units.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span>
+
+<div class="viewcode-block" id="FiniteSquareWell.evaluate">
+<a class="viewcode-back" href="../../../index.html#src.models.potentials.FiniteSquareWell.evaluate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns :math:`V(x) = 0` inside :math:`[0, w]`, :math:`V_0` outside.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: 1D array of spatial coordinates in dimensionless length units.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Float64 array of the same shape as ``x``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">V</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">inside</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">)</span>
+        <span class="n">V</span><span class="p">[</span><span class="n">inside</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">return</span> <span class="n">V</span></div>
+
+
+<div class="viewcode-block" id="FiniteSquareWell.get_domain">
+<a class="viewcode-back" href="../../../index.html#src.models.potentials.FiniteSquareWell.get_domain">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the extended domain :math:`[-w/2,\\, 3w/2]`.</span>
+
+<span class="sd">        The half-width left margin and full-width right margin replicate the</span>
+<span class="sd">        legacy grid ``X_MIN = -L/2``, ``X_MAX = 3L/2``, ensuring sufficient</span>
+<span class="sd">        room for the evanescent wave tails to decay to zero.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The tuple ``(-width/2, 3*width/2)``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;FiniteSquareWell(v0=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_v0</span><span class="si">}</span><span class="s2">, width=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;config=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="si">!r}</span><span class="s2">)&quot;</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="HarmonicPotential">
+<a class="viewcode-back" href="../../../index.html#src.models.potentials.HarmonicPotential">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HarmonicPotential</span><span class="p">(</span><span class="n">BasePotential</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Truncated harmonic oscillator (parabolic) potential.</span>
+
+<span class="sd">    Faithfully reproduces ``potential_harmonic_finite(x, V0, omega, center)``</span>
+<span class="sd">    from ``legacy/research_prototype.ipynb``.</span>
+
+<span class="sd">    The potential is defined as:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        V(x) = \\min\\!\\left(\\frac{1}{2} m\\,\\omega^2 (x - x_c)^2,\\; V_{\\rm lim}\\right)</span>
+
+<span class="sd">    where :math:`m` = ``config.mass``, :math:`\\omega` is the angular</span>
+<span class="sd">    frequency, :math:`x_c` is the well centre, and :math:`V_{\\rm lim}` is</span>
+<span class="sd">    the truncation ceiling.  Truncation ensures finite barrier heights for</span>
+<span class="sd">    numerical tractability without unphysical divergence.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        omega: Angular frequency :math:`\\omega` in dimensionless units.</span>
+<span class="sd">            Legacy default is ``2.2``.</span>
+<span class="sd">        v0_limit: Truncation ceiling :math:`V_{\\rm lim}` in dimensionless</span>
+<span class="sd">            energy units.  Legacy default is ``60.0``.</span>
+<span class="sd">        center: Position of the parabolic minimum :math:`x_c` in</span>
+<span class="sd">            dimensionless length units.  Legacy default is :math:`\\pi/2`.</span>
+<span class="sd">        config: Physics constants.  Reads ``mass`` for the prefactor</span>
+<span class="sd">            :math:`\\frac{1}{2} m \\omega^2`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If ``omega &lt;= 0`` or ``v0_limit &lt;= 0``.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np, math</span>
+<span class="sd">        &gt;&gt;&gt; pot = HarmonicPotential(omega=2.2, v0_limit=60.0, center=math.pi/2)</span>
+<span class="sd">        &gt;&gt;&gt; pot.evaluate(np.array([math.pi / 2]))   # minimum at centre</span>
+<span class="sd">        array([0.])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">omega</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.2</span><span class="p">,</span>
+        <span class="n">v0_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">PhysicsConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialises the truncated harmonic potential.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            omega: Angular frequency :math:`\\omega &gt; 0`.</span>
+<span class="sd">            v0_limit: Truncation ceiling :math:`V_{\\rm lim} &gt; 0`.</span>
+<span class="sd">            center: Parabolic minimum position :math:`x_c`.</span>
+<span class="sd">            config: Physics constants dataclass.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If ``omega &lt;= 0`` or ``v0_limit &lt;= 0``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">omega</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;omega must be positive, got </span><span class="si">{</span><span class="n">omega</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">v0_limit</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;v0_limit must be positive, got </span><span class="si">{</span><span class="n">v0_limit</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_omega</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">omega</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v0_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">v0_limit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_center</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">center</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">omega</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Angular frequency in dimensionless units.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_omega</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">v0_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Truncation ceiling in dimensionless energy units.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v0_limit</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">center</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Position of the parabolic minimum in dimensionless length units.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center</span>
+
+<div class="viewcode-block" id="HarmonicPotential.evaluate">
+<a class="viewcode-back" href="../../../index.html#src.models.potentials.HarmonicPotential.evaluate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns :math:`V(x) = \\min(\\tfrac{1}{2}m\\omega^2(x-x_c)^2,\\, V_{\\rm lim})`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: 1D array of spatial coordinates in dimensionless length units.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Float64 array of the same shape as ``x``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">mass</span>
+        <span class="n">V_soft</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">0.5</span> <span class="o">*</span> <span class="n">m</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_omega</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">V_soft</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v0_limit</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="HarmonicPotential.get_domain">
+<a class="viewcode-back" href="../../../index.html#src.models.potentials.HarmonicPotential.get_domain">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a domain that fully contains both well and barrier regions.</span>
+
+<span class="sd">        The truncation radius :math:`r_t = \\sqrt{2 V_{\\rm lim} / (m\\omega^2)}`</span>
+<span class="sd">        is the distance from the centre at which the parabola reaches</span>
+<span class="sd">        :math:`V_{\\rm lim}`.  A 50 % safety margin is added to ensure</span>
+<span class="sd">        the evanescent tail decays to zero within the grid.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The tuple ``(center - 1.5*r_t, center + 1.5*r_t)``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">mass</span>
+        <span class="n">r_trunc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v0_limit</span> <span class="o">/</span> <span class="p">(</span><span class="n">m</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_omega</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">margin</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">r_trunc</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_center</span> <span class="o">-</span> <span class="n">margin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center</span> <span class="o">+</span> <span class="n">margin</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;HarmonicPotential(omega=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_omega</span><span class="si">}</span><span class="s2">, v0_limit=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_v0_limit</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;center=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_center</span><span class="si">}</span><span class="s2">, config=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="si">!r}</span><span class="s2">)&quot;</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="VShapedPotential">
+<a class="viewcode-back" href="../../../index.html#src.models.potentials.VShapedPotential">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VShapedPotential</span><span class="p">(</span><span class="n">BasePotential</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Truncated V-shape (linear) potential.</span>
+
+<span class="sd">    Faithfully reproduces ``potential_vshape_finite(x, V0, slope, center)``</span>
+<span class="sd">    from ``legacy/research_prototype.ipynb``.</span>
+
+<span class="sd">    The potential is defined as:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        V(x) = \\min\\!\\left(s\\,|x - x_c|,\\; V_{\\rm lim}\\right)</span>
+
+<span class="sd">    where :math:`s` is the linear slope, :math:`x_c` is the cusp centre,</span>
+<span class="sd">    and :math:`V_{\\rm lim}` is the truncation ceiling.  The result is a</span>
+<span class="sd">    tent-shaped well with flat barriers once the slope reaches</span>
+<span class="sd">    :math:`V_{\\rm lim}`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        slope: Linear slope :math:`s` in dimensionless energy-per-length</span>
+<span class="sd">            units.  Legacy default is ``28.0``.</span>
+<span class="sd">        v0_limit: Truncation ceiling :math:`V_{\\rm lim}` in dimensionless</span>
+<span class="sd">            energy units.  Legacy default is ``60.0``.</span>
+<span class="sd">        center: Position of the V-cusp :math:`x_c` in dimensionless length</span>
+<span class="sd">            units.  Legacy default is :math:`\\pi/2`.</span>
+<span class="sd">        config: Physics constants dataclass.  Not required to evaluate this</span>
+<span class="sd">            potential (no mass dependency), but accepted for interface</span>
+<span class="sd">            consistency.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If ``slope &lt;= 0`` or ``v0_limit &lt;= 0``.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np, math</span>
+<span class="sd">        &gt;&gt;&gt; pot = VShapedPotential(slope=28.0, v0_limit=60.0, center=math.pi / 2)</span>
+<span class="sd">        &gt;&gt;&gt; pot.evaluate(np.array([math.pi / 2]))   # cusp — minimum is zero</span>
+<span class="sd">        array([0.])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">slope</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">28.0</span><span class="p">,</span>
+        <span class="n">v0_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">PhysicsConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialises the truncated V-shaped potential.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            slope: Linear slope :math:`s &gt; 0`.</span>
+<span class="sd">            v0_limit: Truncation ceiling :math:`V_{\\rm lim} &gt; 0`.</span>
+<span class="sd">            center: Cusp position :math:`x_c`.</span>
+<span class="sd">            config: Physics constants dataclass.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If ``slope &lt;= 0`` or ``v0_limit &lt;= 0``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">slope</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;slope must be positive, got </span><span class="si">{</span><span class="n">slope</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">v0_limit</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;v0_limit must be positive, got </span><span class="si">{</span><span class="n">v0_limit</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">slope</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v0_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">v0_limit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_center</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">center</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">slope</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Linear slope in dimensionless energy-per-length units.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">v0_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Truncation ceiling in dimensionless energy units.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v0_limit</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">center</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Cusp position in dimensionless length units.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center</span>
+
+<div class="viewcode-block" id="VShapedPotential.evaluate">
+<a class="viewcode-back" href="../../../index.html#src.models.potentials.VShapedPotential.evaluate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns :math:`V(x) = \\min(s\\,|x - x_c|,\\, V_{\\rm lim})`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: 1D array of spatial coordinates in dimensionless length units.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Float64 array of the same shape as ``x``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">V_soft</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">V_soft</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v0_limit</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VShapedPotential.get_domain">
+<a class="viewcode-back" href="../../../index.html#src.models.potentials.VShapedPotential.get_domain">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a domain that fully contains the well and flat barriers.</span>
+
+<span class="sd">        The truncation radius :math:`r_t = V_{\\rm lim} / s` is the distance</span>
+<span class="sd">        from the cusp at which the slope reaches :math:`V_{\\rm lim}`.  A</span>
+<span class="sd">        50 % safety margin is added for the evanescent tails.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The tuple ``(center - 1.5*r_t, center + 1.5*r_t)``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">r_trunc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v0_limit</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span>
+        <span class="n">margin</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">r_trunc</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_center</span> <span class="o">-</span> <span class="n">margin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center</span> <span class="o">+</span> <span class="n">margin</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;VShapedPotential(slope=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_slope</span><span class="si">}</span><span class="s2">, v0_limit=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_v0_limit</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;center=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_center</span><span class="si">}</span><span class="s2">, config=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="si">!r}</span><span class="s2">)&quot;</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Pablo Sanchez, Juan Montoya.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
