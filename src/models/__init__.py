@@ -9,6 +9,7 @@ from .potentials import (
     VShapedPotential,
 )
 from .states import QuantumSystem
+from .statistics import ParticleType
 
 __all__ = [
     "PhysicsConfig",
@@ -19,4 +20,5 @@ __all__ = [
     "HarmonicPotential",
     "VShapedPotential",
     "QuantumSystem",
+    "ParticleType",
 ]
