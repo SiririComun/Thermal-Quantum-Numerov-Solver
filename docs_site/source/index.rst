@@ -17,9 +17,35 @@ Models (Data & Physics)
    :undoc-members:
    :show-inheritance:
 
+Domain Models
+-------------
+.. automodule:: src.models.states
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Core Engine (Solvers)
 ---------------------
 .. automodule:: src.core.solvers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Particle Statistics
+-------------------
+.. automodule:: src.models.statistics
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: src.core.statistics
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Visualisation
+-------------
+.. automodule:: src.visualization.plotters
    :members:
    :undoc-members:
    :show-inheritance:

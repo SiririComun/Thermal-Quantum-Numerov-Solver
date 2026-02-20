@@ -1,0 +1,203 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.models.statistics &mdash; Thermal-Quantum-Numerov-Solver 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Thermal-Quantum-Numerov-Solver
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Thermal-Quantum-Numerov-Solver</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.models.statistics</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.models.statistics</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Particle-statistics enumeration for the two-particle thermal engine.</span>
+
+<span class="sd">This module defines :class:`ParticleType`, an enumeration whose members</span>
+<span class="sd">select the quantum-mechanical symmetry requirement applied to the two-particle</span>
+<span class="sd">spatial wavefunction inside :class:`~src.core.statistics.ThermalEngine`.</span>
+
+<span class="sd">Background</span>
+<span class="sd">----------</span>
+<span class="sd">The **Symmetry Postulate** of quantum mechanics (Pauli, 1940) states that the</span>
+<span class="sd">total wavefunction of a system of *identical* particles must be either</span>
+<span class="sd">*completely symmetric* (bosons) or *completely antisymmetric* (fermions) under</span>
+<span class="sd">the exchange of any two particles.  Because the total wavefunction factorises</span>
+<span class="sd">into a *spatial* part and a *spin* part, different spin-multiplet populations</span>
+<span class="sd">impose different symmetry requirements on the spatial wavefunction.</span>
+
+<span class="sd">The five members of :class:`ParticleType` cover the four cases implemented in</span>
+<span class="sd">``legacy/research_prototype.ipynb`` plus a classical reference:</span>
+
+<span class="sd">============  =======  ==================================  ======================================</span>
+<span class="sd">Member        Spin     Spatial symmetry                  Physical origin</span>
+<span class="sd">============  =======  ==================================  ======================================</span>
+<span class="sd">BOLTZMANN     —        None (distinguishable)            Classical / Maxwell–Boltzmann</span>
+<span class="sd">BOSON         integer  Symmetric (:math:`+`)             Integer total spin (e.g. :sup:`4`\He)</span>
+<span class="sd">FERMION       half-int Antisymmetric (:math:`-`)         Half-integer spin, spin-polarised</span>
+<span class="sd">SPIN_HALF     1/2      1/4 :math:`P_S` + 3/4 :math:`P_A` 2-electron mixed-spin state</span>
+<span class="sd">SPIN_ONE      1        2/3 :math:`P_S` + 1/3 :math:`P_A` 2-boson mixed-spin (spin-1)</span>
+<span class="sd">============  =======  ==================================  ======================================</span>
+
+<span class="sd">**SPIN_HALF derivation** (spin-1/2 fermions, fully mixed spin state):</span>
+<span class="sd">The two-particle spin Hilbert space has dimension 4.  The singlet state</span>
+<span class="sd">(:math:`S=0`, antisymmetric spin) pairs with a *symmetric* spatial state so</span>
+<span class="sd">that the total wavefunction is antisymmetric; the triplet (:math:`S=1`,</span>
+<span class="sd">3 symmetric spin states) pairs with an *antisymmetric* spatial state.</span>
+<span class="sd">At infinite temperature, all four spin states are equally likely, giving:</span>
+
+<span class="sd">.. math::</span>
+
+<span class="sd">    P_{\\text{SPIN-1/2}} = \\frac{1}{4} P_S + \\frac{3}{4} P_A</span>
+
+<span class="sd">**SPIN_ONE derivation** (spin-1 bosons, fully mixed spin state):</span>
+<span class="sd">The spin Hilbert space has dimension 9.  States with total spin</span>
+<span class="sd">:math:`S=2` (5 states, symmetric spin) and :math:`S=0` (1 state, symmetric</span>
+<span class="sd">spin) require symmetric spatial parts; :math:`S=1` (3 states, antisymmetric</span>
+<span class="sd">spin) requires an antisymmetric spatial part.  Hence:</span>
+
+<span class="sd">.. math::</span>
+
+<span class="sd">    P_{\\text{SPIN-1}} = \\frac{6}{9} P_S + \\frac{3}{9} P_A</span>
+<span class="sd">                       = \\frac{2}{3} P_S + \\frac{1}{3} P_A</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">auto</span>
+
+
+<div class="viewcode-block" id="ParticleType">
+<a class="viewcode-back" href="../../../index.html#src.models.statistics.ParticleType">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParticleType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumeration of two-particle statistics / symmetry types.</span>
+
+<span class="sd">    Each member controls how :class:`~src.core.statistics.ThermalEngine`</span>
+<span class="sd">    symmetrises the two-particle spatial wavefunction.</span>
+
+<span class="sd">    Members:</span>
+<span class="sd">        BOLTZMANN: Classical, distinguishable particles.  No exchange</span>
+<span class="sd">            symmetry is imposed.  The two-particle density is the direct</span>
+<span class="sd">            (outer) product of two independent single-particle densities.</span>
+<span class="sd">            This serves as the classical reference for comparing quantum</span>
+<span class="sd">            bunching / antibunching effects.</span>
+<span class="sd">        BOSON: Identical bosons (integer total spin).  The spatial</span>
+<span class="sd">            wavefunction is fully *symmetric* under exchange:</span>
+<span class="sd">            :math:`\\Psi_S \\propto \\phi_n(x_1)\\phi_m(x_2)</span>
+<span class="sd">            + \\phi_n(x_2)\\phi_m(x_1)`.</span>
+<span class="sd">            Bosons tend to *bunch* (enhanced probability near the diagonal</span>
+<span class="sd">            :math:`x_1 = x_2`).</span>
+<span class="sd">        FERMION: Identical fermions in a spin-polarised state (or any</span>
+<span class="sd">            state with a definite antisymmetric spin part).  The spatial</span>
+<span class="sd">            wavefunction is fully *antisymmetric* under exchange:</span>
+<span class="sd">            :math:`\\Psi_A \\propto \\phi_n(x_1)\\phi_m(x_2)</span>
+<span class="sd">            - \\phi_n(x_2)\\phi_m(x_1)`.</span>
+<span class="sd">            The Pauli Exclusion Principle is a direct consequence:</span>
+<span class="sd">            :math:`\\Psi_A(x, x) = 0` exactly, so the diagonal of the</span>
+<span class="sd">            two-particle density vanishes identically.</span>
+<span class="sd">        SPIN_HALF: Two spin-1/2 particles in a thermally mixed spin state</span>
+<span class="sd">            (equal population of all four spin substates).  Results in a</span>
+<span class="sd">            spatial mixture of :math:`1/4\\, P_S + 3/4\\, P_A`.</span>
+<span class="sd">        SPIN_ONE: Two spin-1 particles in a thermally mixed spin state</span>
+<span class="sd">            (equal population of all nine spin substates).  Results in a</span>
+<span class="sd">            spatial mixture of :math:`2/3\\, P_S + 1/3\\, P_A`.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; from src.models.statistics import ParticleType</span>
+<span class="sd">        &gt;&gt;&gt; ParticleType.SPIN_HALF</span>
+<span class="sd">        &lt;ParticleType.SPIN_HALF: 4&gt;</span>
+<span class="sd">        &gt;&gt;&gt; ParticleType.SPIN_HALF.name</span>
+<span class="sd">        &#39;SPIN_HALF&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">BOLTZMANN</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>  <span class="c1"># classical — no exchange symmetry</span>
+    <span class="n">BOSON</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>      <span class="c1"># fully symmetric spatial wavefunction</span>
+    <span class="n">FERMION</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>    <span class="c1"># fully antisymmetric spatial wavefunction</span>
+    <span class="n">SPIN_HALF</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>  <span class="c1"># 1/4 P_S + 3/4 P_A  (two spin-1/2 fermions)</span>
+    <span class="n">SPIN_ONE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>   <span class="c1"># 2/3 P_S + 1/3 P_A  (two spin-1 bosons)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Pablo Sanchez, Juan Montoya.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

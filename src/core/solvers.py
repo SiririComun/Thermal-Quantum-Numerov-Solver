@@ -174,7 +174,8 @@ class NumerovSolver(BaseSolver):
         config: The injected :class:`~src.models.config.NumericalConfig`,
             read-only after construction.
 
-    Example:
+    Example::
+
         >>> from src.models import InfiniteSquareWell
         >>> solver = NumerovSolver()
         >>> energies, wavefunctions = solver.solve(InfiniteSquareWell(), n_states=5)

@@ -160,6 +160,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.models.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumericalConfig</span><span class="p">,</span> <span class="n">PhysicsConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.models.potentials</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasePotential</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.models.states</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumSystem</span>
 
 
 <span class="c1"># ---------------------------------------------------------------------------</span>
@@ -189,11 +190,11 @@
 <span class="sd">                    self,</span>
 <span class="sd">                    potential: BasePotential,</span>
 <span class="sd">                    n_states: int = 20,</span>
-<span class="sd">                ) -&gt; tuple[NDArray[np.float64], NDArray[np.float64]]:</span>
+<span class="sd">                ) -&gt; QuantumSystem:</span>
 <span class="sd">                    ...  # shooting-method implementation</span>
 
 <span class="sd">            experiment: BaseSolver = ShootingSolver()</span>
-<span class="sd">            energies, psi = experiment.solve(InfiniteSquareWell())</span>
+<span class="sd">            system = experiment.solve(InfiniteSquareWell())</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="BaseSolver.solve">
@@ -203,7 +204,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">potential</span><span class="p">:</span> <span class="n">BasePotential</span><span class="p">,</span>
         <span class="n">n_states</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QuantumSystem</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Solves the 1D TISE and returns the lowest ``n_states`` eigenpairs.</span>
 
 <span class="sd">        Args:</span>
@@ -213,15 +214,9 @@
 <span class="sd">                compute.  Must be at least 1.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            A tuple ``(energies, wavefunctions)`` where:</span>
-
-<span class="sd">            - ``energies`` — 1D float64 array of shape ``(n_states,)``</span>
-<span class="sd">              containing :math:`E_n` in dimensionless units of :math:`E_1`,</span>
-<span class="sd">              sorted in ascending order.</span>
-<span class="sd">            - ``wavefunctions`` — 2D float64 array of shape</span>
-<span class="sd">              ``(n_points, n_states)`` where column ``k`` is</span>
-<span class="sd">              :math:`\\psi_k(x)`, normalised so that</span>
-<span class="sd">              :math:`\\int |\\psi_k|^2\\, dx = 1`.</span>
+<span class="sd">            A :class:`~src.models.states.QuantumSystem` containing the</span>
+<span class="sd">            spatial grid, eigenvalues :math:`E_n`, normalised eigenvectors</span>
+<span class="sd">            :math:`\\psi_n(x)`, and a reference to the originating potential.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If ``n_states &lt; 1``.</span>
@@ -255,7 +250,8 @@
 <span class="sd">        config: The injected :class:`~src.models.config.NumericalConfig`,</span>
 <span class="sd">            read-only after construction.</span>
 
-<span class="sd">    Example:</span>
+<span class="sd">    Example::</span>
+
 <span class="sd">        &gt;&gt;&gt; from src.models import InfiniteSquareWell</span>
 <span class="sd">        &gt;&gt;&gt; solver = NumerovSolver()</span>
 <span class="sd">        &gt;&gt;&gt; energies, wavefunctions = solver.solve(InfiniteSquareWell(), n_states=5)</span>
@@ -293,8 +289,8 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">potential</span><span class="p">:</span> <span class="n">BasePotential</span><span class="p">,</span>
         <span class="n">n_states</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Solves the 1D TISE for the given potential and returns eigenpairs.</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QuantumSystem</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Solves the 1D TISE for the given potential and returns a QuantumSystem.</span>
 
 <span class="sd">        The method follows these steps:</span>
 
@@ -313,6 +309,10 @@
 <span class="sd">           :math:`E_n = \\varepsilon_n \\hbar^2 / (2m)`.</span>
 <span class="sd">        5. **Normalisation**: Calls :meth:`_normalize` on each wavefunction</span>
 <span class="sd">           so that :math:`\\int |\\psi_n(x)|^2\\, dx = 1`.</span>
+<span class="sd">        6. **Wrapping**: Bundles the spatial grid, energies, wavefunctions,</span>
+<span class="sd">           and originating potential into a :class:`~src.models.states.QuantumSystem`</span>
+<span class="sd">           domain model, enforcing shape consistency and eliminating data</span>
+<span class="sd">           desynchronisation.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            potential: Any concrete :class:`~src.models.potentials.BasePotential`</span>
@@ -324,14 +324,16 @@
 <span class="sd">                Defaults to 20.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            A tuple ``(energies, wavefunctions)`` where:</span>
+<span class="sd">            A :class:`~src.models.states.QuantumSystem` containing:</span>
 
-<span class="sd">            - ``energies`` is a 1D float64 array of shape ``(n_states,)``</span>
+<span class="sd">            - ``energies`` — 1D float64 array of shape ``(n_states,)``</span>
 <span class="sd">              containing :math:`E_n` in dimensionless units of :math:`E_1`.</span>
-<span class="sd">            - ``wavefunctions`` is a 2D float64 array of shape</span>
+<span class="sd">            - ``wavefunctions`` — 2D float64 array of shape</span>
 <span class="sd">              ``(n_points, n_states)`` where column ``k`` is</span>
 <span class="sd">              :math:`\\psi_k(x)`, normalised so that</span>
 <span class="sd">              :math:`\\int |\\psi_k|^2\\, dx = 1`.</span>
+<span class="sd">            - ``x_grid`` — the uniform spatial coordinate array.</span>
+<span class="sd">            - ``potential`` — the originating :class:`~src.models.potentials.BasePotential`.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If ``n_states &lt; 1`` or if the grid has fewer than 3</span>
@@ -447,7 +449,17 @@
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_req</span><span class="p">):</span>
             <span class="n">psi_full</span><span class="p">[:,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">psi_full</span><span class="p">[:,</span> <span class="n">k</span><span class="p">])</span>
 
-        <span class="k">return</span> <span class="n">energies</span><span class="p">,</span> <span class="n">psi_full</span></div>
+        <span class="c1"># ── 9. Wrap into QuantumSystem domain model ───────────────────────────</span>
+        <span class="c1"># Bundling eliminates data desynchronisation: x, energies, and</span>
+        <span class="c1"># wavefunctions are created together and validated together.  A consumer</span>
+        <span class="c1"># can never accidentally pair wavefunctions from one solve call with a</span>
+        <span class="c1"># grid rebuilt with different parameters.</span>
+        <span class="k">return</span> <span class="n">QuantumSystem</span><span class="p">(</span>
+            <span class="n">energies</span><span class="o">=</span><span class="n">energies</span><span class="p">,</span>
+            <span class="n">wavefunctions</span><span class="o">=</span><span class="n">psi_full</span><span class="p">,</span>
+            <span class="n">x_grid</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+            <span class="n">potential</span><span class="o">=</span><span class="n">potential</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
     <span class="c1"># ------------------------------------------------------------------</span>

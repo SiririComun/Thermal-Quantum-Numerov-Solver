@@ -1,0 +1,596 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.core.statistics &mdash; Thermal-Quantum-Numerov-Solver 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Thermal-Quantum-Numerov-Solver
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Thermal-Quantum-Numerov-Solver</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.core.statistics</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.core.statistics</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Thermal statistics engine for 1D quantum systems of identical particles.</span>
+
+<span class="sd">This module provides :class:`ThermalEngine`, the service class responsible for</span>
+<span class="sd">all statistical-mechanics post-processing of a solved :class:`QuantumSystem`.</span>
+<span class="sd">It refactors and encapsulates two families of functions from</span>
+<span class="sd">``legacy/research_prototype.ipynb``:</span>
+
+<span class="sd">- ``calc_thermal_density`` (single-particle Boltzmann-weighted density)</span>
+<span class="sd">- ``get_pair_prob`` + ``calc_thermal_2p`` (two-particle symmetrised density)</span>
+
+<span class="sd">Design (SOLID)</span>
+<span class="sd">--------------</span>
+<span class="sd">- **SRP**: ``ThermalEngine`` does one thing — thermal averaging.  It never</span>
+<span class="sd">  touches eigenvalue solvers or potential geometry.</span>
+<span class="sd">- **OCP**: New statistics (e.g. anyons) can be added by extending</span>
+<span class="sd">  :class:`~src.models.statistics.ParticleType` and the ``_spin_components``</span>
+<span class="sd">  helper without modifying existing methods.</span>
+<span class="sd">- **DIP**: All physics input arrives through the :class:`~src.models.states.QuantumSystem`</span>
+<span class="sd">  interface; no concrete solver class is imported.</span>
+
+<span class="sd">Mathematical Summary</span>
+<span class="sd">--------------------</span>
+<span class="sd">**Single-particle thermal density**</span>
+
+<span class="sd">.. math::</span>
+
+<span class="sd">    \\rho_{\\text{th}}(x) = \\frac{1}{Z}</span>
+<span class="sd">    \\sum_{n=0}^{N-1} e^{-(E_n - E_0)/(k_B T)}\\, |\\psi_n(x)|^2,</span>
+<span class="sd">    \\qquad Z = \\sum_{n=0}^{N-1} e^{-(E_n - E_0)/(k_B T)}</span>
+
+<span class="sd">States are accumulated one at a time; summation stops when the maximum</span>
+<span class="sd">pointwise change in :math:`\\rho(x)` falls below ``tolerance``.</span>
+
+<span class="sd">**Two-particle symmetrised pair density** (for :math:`n \\neq m`)</span>
+
+<span class="sd">.. math::</span>
+
+<span class="sd">    \\Psi_S(x_1, x_2) = \\frac{1}{\\sqrt{2}}</span>
+<span class="sd">    \\bigl[\\phi_n(x_1)\\phi_m(x_2) + \\phi_n(x_2)\\phi_m(x_1)\\bigr]</span>
+<span class="sd">    \\quad (\\text{bosons})</span>
+
+<span class="sd">.. math::</span>
+
+<span class="sd">    \\Psi_A(x_1, x_2) = \\frac{1}{\\sqrt{2}}</span>
+<span class="sd">    \\bigl[\\phi_n(x_1)\\phi_m(x_2) - \\phi_n(x_2)\\phi_m(x_1)\\bigr]</span>
+<span class="sd">    \\quad (\\text{fermions})</span>
+
+<span class="sd">The diagonal :math:`\\Psi_A(x, x) = 0` identically (Pauli Exclusion Principle).</span>
+
+<span class="sd">**Thermal two-particle pair density**</span>
+
+<span class="sd">.. math::</span>
+
+<span class="sd">    \\rho_{\\text{pair}}(x_1, x_2) = \\frac{1}{Z}</span>
+<span class="sd">    \\sum_{n,m} e^{-(E_n + E_m - 2E_0)/(k_B T)}\\,</span>
+<span class="sd">    \\sum_c f_c\\, |\\Psi_{c,nm}(x_1, x_2)|^2</span>
+
+<span class="sd">where :math:`c` indexes symmetry channels and :math:`f_c` are the</span>
+<span class="sd">spin-degeneracy fractions from :class:`~src.models.statistics.ParticleType`.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">math</span><span class="w"> </span><span class="kn">import</span> <span class="n">sqrt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.models.states</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumSystem</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.models.statistics</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParticleType</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Spin-fraction lookup (pure data — no logic)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="c1"># Mapping from ParticleType to [(component_ParticleType, fraction), ...]</span>
+<span class="c1"># BOLTZMANN is handled as a special branch (no symmetrisation).</span>
+<span class="c1"># BOSON and FERMION are &quot;pure&quot; — only one component with fraction 1.0.</span>
+<span class="c1"># SPIN_HALF and SPIN_ONE are spin-averaged mixtures.</span>
+<span class="c1">#</span>
+<span class="c1"># Derivations: see module docstring and src/models/statistics.py.</span>
+<span class="n">_SPIN_COMPONENTS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">ParticleType</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">ParticleType</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">ParticleType</span><span class="o">.</span><span class="n">BOSON</span><span class="p">:</span> <span class="p">[(</span><span class="n">ParticleType</span><span class="o">.</span><span class="n">BOSON</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)],</span>
+    <span class="n">ParticleType</span><span class="o">.</span><span class="n">FERMION</span><span class="p">:</span> <span class="p">[(</span><span class="n">ParticleType</span><span class="o">.</span><span class="n">FERMION</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)],</span>
+    <span class="c1"># Spin-1/2 fermion pair: singlet (1/4) symmetric + triplet (3/4) antisymmetric</span>
+    <span class="n">ParticleType</span><span class="o">.</span><span class="n">SPIN_HALF</span><span class="p">:</span> <span class="p">[(</span><span class="n">ParticleType</span><span class="o">.</span><span class="n">BOSON</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">4.0</span><span class="p">),</span>
+                             <span class="p">(</span><span class="n">ParticleType</span><span class="o">.</span><span class="n">FERMION</span><span class="p">,</span> <span class="mf">3.0</span> <span class="o">/</span> <span class="mf">4.0</span><span class="p">)],</span>
+    <span class="c1"># Spin-1 boson pair: (S=2,S=0) symmetric (6/9) + S=1 antisymmetric (3/9)</span>
+    <span class="n">ParticleType</span><span class="o">.</span><span class="n">SPIN_ONE</span><span class="p">:</span> <span class="p">[(</span><span class="n">ParticleType</span><span class="o">.</span><span class="n">BOSON</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">),</span>
+                            <span class="p">(</span><span class="n">ParticleType</span><span class="o">.</span><span class="n">FERMION</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">)],</span>
+<span class="p">}</span>
+
+<span class="n">_LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ThermalEngine">
+<a class="viewcode-back" href="../../../index.html#src.core.statistics.ThermalEngine">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ThermalEngine</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Service class for thermal and multi-particle statistical calculations.</span>
+
+<span class="sd">    :class:`ThermalEngine` is a stateless service: all state lives in the</span>
+<span class="sd">    :class:`~src.models.states.QuantumSystem` objects passed to its methods.</span>
+<span class="sd">    The engine is safe to instantiate once and reuse across multiple systems</span>
+<span class="sd">    and temperatures.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        log_level: Python logging level (e.g. ``logging.DEBUG``) used for</span>
+<span class="sd">            internal convergence progress messages.  Defaults to</span>
+<span class="sd">            ``logging.WARNING`` (silent in normal use).</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; from src.core import NumerovSolver</span>
+<span class="sd">        &gt;&gt;&gt; from src.core.statistics import ThermalEngine</span>
+<span class="sd">        &gt;&gt;&gt; from src.models import InfiniteSquareWell</span>
+<span class="sd">        &gt;&gt;&gt; from src.models.statistics import ParticleType</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; system = NumerovSolver().solve(InfiniteSquareWell(), n_states=20)</span>
+<span class="sd">        &gt;&gt;&gt; engine = ThermalEngine()</span>
+<span class="sd">        &gt;&gt;&gt; rho    = engine.calculate_thermal_density(system, temperature=5.0)</span>
+<span class="sd">        &gt;&gt;&gt; rho_2p = engine.calculate_pair_density(system, 5.0, ParticleType.FERMION)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialises the engine and configures the internal logger.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            log_level: Logging verbosity.  Set to ``logging.DEBUG`` to trace</span>
+<span class="sd">                convergence iteration counts.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_LOG</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">log_level</span><span class="p">)</span>
+        <span class="n">_LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;ThermalEngine initialised.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="c1"># Public methods</span>
+    <span class="c1"># ------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="ThermalEngine.calculate_thermal_density">
+<a class="viewcode-back" href="../../../index.html#src.core.statistics.ThermalEngine.calculate_thermal_density">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_thermal_density</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">system</span><span class="p">:</span> <span class="n">QuantumSystem</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes the single-particle thermal probability density :math:`\\rho_{\\text{th}}(x)`.</span>
+
+<span class="sd">        States are added one at a time in ascending energy order.  Summation</span>
+<span class="sd">        halts as soon as the maximum pointwise change in :math:`\\rho(x)` after</span>
+<span class="sd">        adding the latest state is smaller than ``tolerance`` — the convergence</span>
+<span class="sd">        criterion from ``legacy/research_prototype.ipynb``.</span>
+
+<span class="sd">        The Boltzmann factor uses :math:`E_0` as the energy reference to</span>
+<span class="sd">        prevent floating-point underflow for large :math:`E_n / (k_B T)`:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            w_n = e^{-(E_n - E_0)/(k_B T)}</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            system: A solved :class:`~src.models.states.QuantumSystem`.</span>
+<span class="sd">            temperature: Absolute temperature :math:`T` in dimensionless units</span>
+<span class="sd">                (same scale as ``system.potential.config.kb``).</span>
+<span class="sd">            tolerance: Maximum allowed pointwise change in :math:`\\rho(x)`</span>
+<span class="sd">                between successive state additions.  Summation stops when</span>
+<span class="sd">                this threshold is met.  Defaults to ``1e-4``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            1D float64 array of shape ``(n_points,)`` containing</span>
+<span class="sd">            :math:`\\rho_{\\text{th}}(x)`, normalised so that its trapezoid</span>
+<span class="sd">            integral over ``system.x_grid`` is :math:`\\approx 1`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If ``temperature &lt;= 0``.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            At very low temperatures, only the ground state contributes</span>
+<span class="sd">            meaningfully.  At high temperatures, the sum may require all</span>
+<span class="sd">            ``system.n_states`` states before convergence; in that case a</span>
+<span class="sd">            ``logging.DEBUG`` message is emitted and all states are used.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; rho = engine.calculate_thermal_density(system, temperature=10.0)</span>
+<span class="sd">            &gt;&gt;&gt; float(np.trapz(rho, system.x_grid))  # ≈ 1.0</span>
+<span class="sd">            1.0</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">temperature</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;temperature must be strictly positive, got </span><span class="si">{</span><span class="n">temperature</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># k_B is stored in the potential&#39;s PhysicsConfig (kb=1.0 in default units)</span>
+        <span class="n">kb</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="n">potential</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">kb</span>
+        <span class="n">kbt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">temperature</span>       <span class="c1"># k_B · T  (dimensionless thermal energy)</span>
+        <span class="n">E0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="n">ground_state_energy</span>
+
+        <span class="c1"># ── Accumulate states with convergence check ─────────────────────</span>
+        <span class="n">rho_prev</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">system</span><span class="o">.</span><span class="n">x_grid</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">rho_accum</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">system</span><span class="o">.</span><span class="n">x_grid</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">Z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">n_converged</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="n">n_states</span>  <span class="c1"># fallback: use all states</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">system</span><span class="o">.</span><span class="n">n_states</span><span class="p">):</span>
+            <span class="n">E_n</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">system</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+            <span class="c1"># Boltzmann weight: reference-shifted to avoid underflow</span>
+            <span class="n">w_n</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">E_n</span> <span class="o">-</span> <span class="n">E0</span><span class="p">)</span> <span class="o">/</span> <span class="n">kbt</span><span class="p">))</span>
+            <span class="n">Z</span> <span class="o">+=</span> <span class="n">w_n</span>
+            <span class="c1"># Accumulate weighted probability density for state n</span>
+            <span class="n">rho_accum</span> <span class="o">+=</span> <span class="n">w_n</span> <span class="o">*</span> <span class="n">system</span><span class="o">.</span><span class="n">wavefunctions</span><span class="p">[:,</span> <span class="n">n</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span>
+
+            <span class="n">rho_current</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">rho_accum</span> <span class="o">/</span> <span class="n">Z</span>
+
+            <span class="c1"># Convergence check: skip the first state (no previous estimate)</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">max_change</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rho_current</span> <span class="o">-</span> <span class="n">rho_prev</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">max_change</span> <span class="o">&lt;</span> <span class="n">tolerance</span><span class="p">:</span>
+                    <span class="n">n_converged</span> <span class="o">=</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="n">_LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                        <span class="s2">&quot;calculate_thermal_density: converged after </span><span class="si">%d</span><span class="s2"> states &quot;</span>
+                        <span class="s2">&quot;(max_change=</span><span class="si">%.2e</span><span class="s2"> &lt; tol=</span><span class="si">%.2e</span><span class="s2">, T=</span><span class="si">%.4f</span><span class="s2">).&quot;</span><span class="p">,</span>
+                        <span class="n">n_converged</span><span class="p">,</span> <span class="n">max_change</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="k">return</span> <span class="n">rho_current</span>
+
+            <span class="n">rho_prev</span> <span class="o">=</span> <span class="n">rho_current</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">_LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;calculate_thermal_density: used all </span><span class="si">%d</span><span class="s2"> states without meeting &quot;</span>
+            <span class="s2">&quot;tolerance </span><span class="si">%.2e</span><span class="s2"> (T=</span><span class="si">%.4f</span><span class="s2">).  Consider increasing n_states.&quot;</span><span class="p">,</span>
+            <span class="n">system</span><span class="o">.</span><span class="n">n_states</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">rho_prev</span></div>
+
+
+<div class="viewcode-block" id="ThermalEngine.get_pair_density">
+<a class="viewcode-back" href="../../../index.html#src.core.statistics.ThermalEngine.get_pair_density">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_pair_density</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">system</span><span class="p">:</span> <span class="n">QuantumSystem</span><span class="p">,</span>
+        <span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">p_type</span><span class="p">:</span> <span class="n">ParticleType</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the two-particle spatial density :math:`|\\Psi(x_1, x_2)|^2` for a single eigenstate pair.</span>
+
+<span class="sd">        This is the *zero-temperature* building block used by</span>
+<span class="sd">        :meth:`calculate_pair_density`.  Calling this method directly is</span>
+<span class="sd">        useful for visualising a specific quantum state pair or verifying</span>
+<span class="sd">        the Pauli Exclusion Principle on the diagonal.</span>
+
+<span class="sd">        **Symmetry Requirement (Quantum Mechanics):**</span>
+<span class="sd">        For *identical* particles, the total wavefunction must be (anti-)symmetric</span>
+<span class="sd">        under particle exchange (:math:`x_1 \\leftrightarrow x_2`).  The spatial</span>
+<span class="sd">        part alone determines the exchange character only when the spin state is</span>
+<span class="sd">        fixed.  Here, the spatial symmetry is enforced per the ``p_type``</span>
+<span class="sd">        specification:</span>
+
+<span class="sd">        - **BOSON** (:math:`n_1 \\neq n_2`):</span>
+<span class="sd">          :math:`\\Psi_S = (\\phi_{n_1}(x_1)\\phi_{n_2}(x_2) + \\phi_{n_1}(x_2)\\phi_{n_2}(x_1)) / \\sqrt{2}`</span>
+<span class="sd">        - **FERMION** (:math:`n_1 \\neq n_2`):</span>
+<span class="sd">          :math:`\\Psi_A = (\\phi_{n_1}(x_1)\\phi_{n_2}(x_2) - \\phi_{n_1}(x_2)\\phi_{n_2}(x_1)) / \\sqrt{2}`</span>
+<span class="sd">        - **FERMION** (:math:`n_1 = n_2`):</span>
+<span class="sd">          :math:`\\Psi_A \\equiv 0` — Pauli Exclusion Principle.</span>
+<span class="sd">        - **BOSON** (:math:`n_1 = n_2`):</span>
+<span class="sd">          :math:`\\Psi_S = \\phi_{n_1}(x_1)\\phi_{n_1}(x_2)` (already normalised).</span>
+
+<span class="sd">        For :data:`~src.models.statistics.ParticleType.SPIN_HALF` and</span>
+<span class="sd">        :data:`~src.models.statistics.ParticleType.SPIN_ONE`, the density is</span>
+<span class="sd">        a weighted sum of the symmetric and antisymmetric components.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            system: A solved :class:`~src.models.states.QuantumSystem`.</span>
+<span class="sd">            n1: Zero-based index of the first eigenstate (must be in</span>
+<span class="sd">                ``[0, system.n_states)``).</span>
+<span class="sd">            n2: Zero-based index of the second eigenstate (must be in</span>
+<span class="sd">                ``[0, system.n_states)``).</span>
+<span class="sd">            p_type: The :class:`~src.models.statistics.ParticleType` controlling</span>
+<span class="sd">                the spatial symmetry of the pair wavefunction.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            2D float64 array of shape ``(n_points, n_points)`` where entry</span>
+<span class="sd">            ``[i, j]`` is :math:`|\\Psi(x_i, x_j)|^2`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            IndexError: If ``n1`` or ``n2`` is outside ``[0, system.n_states)``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">n1</span> <span class="o">&lt;</span> <span class="n">system</span><span class="o">.</span><span class="n">n_states</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;n1=</span><span class="si">{</span><span class="n">n1</span><span class="si">}</span><span class="s2"> is out of range for system with </span><span class="si">{</span><span class="n">system</span><span class="o">.</span><span class="n">n_states</span><span class="si">}</span><span class="s2"> states.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">n2</span> <span class="o">&lt;</span> <span class="n">system</span><span class="o">.</span><span class="n">n_states</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;n2=</span><span class="si">{</span><span class="n">n2</span><span class="si">}</span><span class="s2"> is out of range for system with </span><span class="si">{</span><span class="n">system</span><span class="o">.</span><span class="n">n_states</span><span class="si">}</span><span class="s2"> states.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">psi_n</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="n">wavefunctions</span><span class="p">[:,</span> <span class="n">n1</span><span class="p">]</span>
+        <span class="n">psi_m</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="n">wavefunctions</span><span class="p">[:,</span> <span class="n">n2</span><span class="p">]</span>
+
+        <span class="c1"># Outer product: base[i, j] = ψ_n(x_i) · ψ_m(x_j)</span>
+        <span class="c1"># Shape: (n_points, n_points) — the core of all pair calculations.</span>
+        <span class="c1"># np.outer is used because it is a vectorized O(N²) BLAS-level operation,</span>
+        <span class="c1"># far more efficient than any Python loop for constructing the 2D grid.</span>
+        <span class="n">base</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">psi_n</span><span class="p">,</span> <span class="n">psi_m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_pair_density</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">p_type</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ThermalEngine.calculate_pair_density">
+<a class="viewcode-back" href="../../../index.html#src.core.statistics.ThermalEngine.calculate_pair_density">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_pair_density</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">system</span><span class="p">:</span> <span class="n">QuantumSystem</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">p_type</span><span class="p">:</span> <span class="n">ParticleType</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes the Boltzmann-weighted two-particle spatial density matrix.</span>
+
+<span class="sd">        Sums over all pairs :math:`(n, m)` of eigenstates, weighted by the</span>
+<span class="sd">        two-particle Boltzmann factor, and applies the symmetrisation required</span>
+<span class="sd">        by ``p_type``:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \\rho_{\\text{pair}}(x_1, x_2) = \\frac{1}{Z}</span>
+<span class="sd">            \\sum_{n=0}^{N-1} \\sum_{m=0}^{N-1}</span>
+<span class="sd">            e^{-(E_n + E_m - 2 E_0)/(k_B T)}</span>
+<span class="sd">            \\sum_c f_c\\, |\\Psi_{c,nm}(x_1, x_2)|^2</span>
+
+<span class="sd">        The energy reference :math:`2 E_0` (twice the single-particle ground</span>
+<span class="sd">        state) is subtracted to prevent floating-point underflow.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            system: A solved :class:`~src.models.states.QuantumSystem`.</span>
+<span class="sd">            temperature: Absolute temperature :math:`T` in dimensionless units.</span>
+<span class="sd">            p_type: The :class:`~src.models.statistics.ParticleType` controlling</span>
+<span class="sd">                symmetry (and spin-mixture fractions) of the pair wavefunction.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            2D float64 array of shape ``(n_points, n_points)`` where entry</span>
+<span class="sd">            ``[i, j]`` is the thermal pair probability density at</span>
+<span class="sd">            :math:`(x_i, x_j)`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If ``temperature &lt;= 0``.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            **Performance**: The inner loop constructs one ``(N, N)`` outer</span>
+<span class="sd">            product per state pair using :func:`numpy.outer` (BLAS level-2).</span>
+<span class="sd">            For ``n_states=20`` and ``N=600``, this is 400 outer products of</span>
+<span class="sd">            size :math:`600 \\times 600 = 360{,}000` elements each — fully</span>
+<span class="sd">            vectorised and cache-friendly.</span>
+
+<span class="sd">            **Fermionic normalisation**: For :data:`ParticleType.FERMION`, pairs</span>
+<span class="sd">            with :math:`n_1 = n_2` contribute zero probability density (Pauli</span>
+<span class="sd">            Exclusion) but their Boltzmann weight still enters :math:`Z`.  This</span>
+<span class="sd">            mirrors the legacy implementation and preserves relative comparison</span>
+<span class="sd">            between boson and fermion distributions.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; rho_2p = engine.calculate_pair_density(system, 10.0, ParticleType.BOSON)</span>
+<span class="sd">            &gt;&gt;&gt; rho_2p.shape</span>
+<span class="sd">            (600, 600)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">temperature</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;temperature must be strictly positive, got </span><span class="si">{</span><span class="n">temperature</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">kb</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="n">potential</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">kb</span>
+        <span class="n">kbt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">temperature</span>
+        <span class="n">E0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="n">ground_state_energy</span>
+        <span class="n">E</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="n">energies</span>   <span class="c1"># shape (n_states,)</span>
+        <span class="n">n_pts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">system</span><span class="o">.</span><span class="n">x_grid</span><span class="p">)</span>
+        <span class="n">n_states</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="n">n_states</span>
+
+        <span class="n">P_accum</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_pts</span><span class="p">,</span> <span class="n">n_pts</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">Z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_states</span><span class="p">):</span>
+            <span class="n">psi_n</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="n">wavefunctions</span><span class="p">[:,</span> <span class="n">n</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_states</span><span class="p">):</span>
+                <span class="n">psi_m</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="n">wavefunctions</span><span class="p">[:,</span> <span class="n">m</span><span class="p">]</span>
+
+                <span class="c1"># Two-particle Boltzmann weight.</span>
+                <span class="c1"># Reference: 2·E_0 (total ground-state energy of the pair).</span>
+                <span class="c1"># This shift is mathematically exact and prevents underflow for</span>
+                <span class="c1"># high-lying states at low temperatures.</span>
+                <span class="n">w_nm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">E</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+</span> <span class="n">E</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">E0</span><span class="p">)</span> <span class="o">/</span> <span class="n">kbt</span><span class="p">))</span>
+                <span class="p">)</span>
+                <span class="n">Z</span> <span class="o">+=</span> <span class="n">w_nm</span>
+
+                <span class="c1"># Outer product: base[i,j] = ψ_n(x_i)·ψ_m(x_j)</span>
+                <span class="n">base</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">psi_n</span><span class="p">,</span> <span class="n">psi_m</span><span class="p">)</span>
+
+                <span class="c1"># Accumulate symmetrised pair density weighted by spin fractions</span>
+                <span class="n">P_accum</span> <span class="o">+=</span> <span class="n">w_nm</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_pair_density</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">p_type</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">P_accum</span> <span class="o">/</span> <span class="n">Z</span></div>
+
+
+    <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="c1"># Private helpers</span>
+    <span class="c1"># ------------------------------------------------------------------</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_pair_density</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">base</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>
+        <span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">p_type</span><span class="p">:</span> <span class="n">ParticleType</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Applies the symmetry requirement to a pre-computed outer product.</span>
+
+<span class="sd">        This is the core computational primitive of the symmetrisation algebra.</span>
+<span class="sd">        It is separated from the public methods so that the outer product (the</span>
+<span class="sd">        expensive operation) is computed only once per pair and reused across</span>
+<span class="sd">        the spin-mixture components.</span>
+
+<span class="sd">        **Vectorised symmetrisation** (``np.outer`` is a rank-1 update):</span>
+
+<span class="sd">        Given ``base[i,j] = ψ_n(x_i) · ψ_m(x_j)``:</span>
+
+<span class="sd">        - Symmetric:     ``(base + base.T) / √2``</span>
+<span class="sd">          → evaluates to zero on the anti-diagonal, enhanced on the diagonal.</span>
+<span class="sd">        - Antisymmetric: ``(base - base.T) / √2``</span>
+<span class="sd">          → ``base[i,i] - base.T[i,i] = ψ_n(x_i)ψ_m(x_i) - ψ_m(x_i)ψ_n(x_i) = 0``</span>
+<span class="sd">          → **exact** zero on the diagonal for all grids, all potentials.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            base: 2D float64 array of shape ``(n_points, n_points)`` where</span>
+<span class="sd">                ``base[i, j] = ψ_n(x_i) · ψ_m(x_j)``.</span>
+<span class="sd">            n1: Zero-based index of the first eigenstate (used to detect the</span>
+<span class="sd">                ``n1 == n2`` degenerate case).</span>
+<span class="sd">            n2: Zero-based index of the second eigenstate.</span>
+<span class="sd">            p_type: :class:`~src.models.statistics.ParticleType` controlling</span>
+<span class="sd">                the spatial symmetry.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            2D float64 array of shape ``(n_points, n_points)`` containing</span>
+<span class="sd">            :math:`|\\Psi(x_1, x_2)|^2` for the given symmetry type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_pts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">p_type</span> <span class="ow">is</span> <span class="n">ParticleType</span><span class="o">.</span><span class="n">BOLTZMANN</span><span class="p">:</span>
+            <span class="c1"># Classical / distinguishable particles: no exchange correction.</span>
+            <span class="c1"># P(x1, x2) = |ψ_n(x1)|² · |ψ_m(x2)|²  (outer product of densities)</span>
+            <span class="c1"># Using base**2 = ψ_n(x1)²·ψ_m(x2)² is equivalent for real ψ.</span>
+            <span class="k">return</span> <span class="n">base</span> <span class="o">**</span> <span class="mi">2</span>
+
+        <span class="c1"># For quantum particles: decompose into symmetry channels weighted by</span>
+        <span class="c1"># their spin-degeneracy fractions from _SPIN_COMPONENTS.</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="n">_SPIN_COMPONENTS</span><span class="p">[</span><span class="n">p_type</span><span class="p">]</span>
+        <span class="n">result</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_pts</span><span class="p">,</span> <span class="n">n_pts</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">component</span><span class="p">,</span> <span class="n">fraction</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">component</span> <span class="ow">is</span> <span class="n">ParticleType</span><span class="o">.</span><span class="n">BOSON</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">n1</span> <span class="o">==</span> <span class="n">n2</span><span class="p">:</span>
+                    <span class="c1"># Same state: Ψ(x1,x2) = ψ_n(x1)·ψ_n(x2) — no √2 factor.</span>
+                    <span class="c1"># This is already normalised since ∫|ψ_n|² dx = 1.</span>
+                    <span class="n">psi_pair</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">base</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># ── Bosonic symmetrisation (exchange enhancement) ──────────</span>
+                    <span class="c1"># Ψ_S = [ψ_n(x1)ψ_m(x2) + ψ_m(x1)ψ_n(x2)] / √2</span>
+                    <span class="c1"># = (base + base.T) / √2</span>
+                    <span class="c1"># Diagonal: ψ_n(x)ψ_m(x) + ψ_m(x)ψ_n(x) = 2ψ_n(x)ψ_m(x)</span>
+                    <span class="c1"># → bosons BUNCH: enhanced probability near x1=x2.</span>
+                    <span class="n">psi_pair</span> <span class="o">=</span> <span class="p">(</span><span class="n">base</span> <span class="o">+</span> <span class="n">base</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># component is ParticleType.FERMION</span>
+                <span class="k">if</span> <span class="n">n1</span> <span class="o">==</span> <span class="n">n2</span><span class="p">:</span>
+                    <span class="c1"># Pauli Exclusion Principle: two identical fermions cannot</span>
+                    <span class="c1"># occupy the same single-particle state.  The antisymmetric</span>
+                    <span class="c1"># combination vanishes identically: Ψ_A = 0.</span>
+                    <span class="n">result</span> <span class="o">+=</span> <span class="n">fraction</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_pts</span><span class="p">,</span> <span class="n">n_pts</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># ── Fermionic antisymmetrisation (exchange hole) ───────────</span>
+                    <span class="c1"># Ψ_A = [ψ_n(x1)ψ_m(x2) - ψ_m(x1)ψ_n(x2)] / √2</span>
+                    <span class="c1"># = (base - base.T) / √2</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># Diagonal proof (Pauli Exclusion):</span>
+                    <span class="c1"># (base - base.T)[i,i]</span>
+                    <span class="c1">#   = ψ_n(x_i)·ψ_m(x_i) - ψ_m(x_i)·ψ_n(x_i)</span>
+                    <span class="c1">#   = 0  (exactly, for any grid, any potential)</span>
+                    <span class="c1"># ⟹ |Ψ_A(x,x)|² = 0 for all x — the exchange hole.</span>
+                    <span class="n">psi_pair</span> <span class="o">=</span> <span class="p">(</span><span class="n">base</span> <span class="o">-</span> <span class="n">base</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+
+            <span class="c1"># |Ψ|² is the spatial probability density of the pair</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="n">fraction</span> <span class="o">*</span> <span class="n">psi_pair</span> <span class="o">**</span> <span class="mi">2</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Pablo Sanchez, Juan Montoya.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,353 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.models.states &mdash; Thermal-Quantum-Numerov-Solver 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Thermal-Quantum-Numerov-Solver
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Thermal-Quantum-Numerov-Solver</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.models.states</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.models.states</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Domain model for the output of a quantum eigenvalue solver.</span>
+
+<span class="sd">The :class:`QuantumSystem` class replaces the raw ``tuple[NDArray, NDArray]``</span>
+<span class="sd">previously returned by :class:`~src.core.solvers.BaseSolver`. It solves the</span>
+<span class="sd">**Data Desynchronisation** problem: in the legacy prototype, the spatial grid</span>
+<span class="sd">``x``, the energy array, and the wavefunction matrix were three separate</span>
+<span class="sd">variables that could silently diverge (e.g. if ``x`` was rebuilt with different</span>
+<span class="sd">parameters while the wavefunctions were kept from an earlier run).</span>
+
+<span class="sd">``QuantumSystem`` bundles all four pieces of a solved quantum problem into a</span>
+<span class="sd">single, self-validating, immutable object:</span>
+
+<span class="sd">- **``x_grid``** — the spatial coordinates on which wavefunctions are defined.</span>
+<span class="sd">- **``energies``** — the eigenvalues :math:`E_n` for each state.</span>
+<span class="sd">- **``wavefunctions``** — the normalised :math:`\\psi_n(x)` columns.</span>
+<span class="sd">- **``potential``** — the :class:`~src.models.potentials.BasePotential` that</span>
+<span class="sd">  was solved, providing geometry and physical-constant context.</span>
+
+<span class="sd">Shape consistency is enforced at construction time, making silent</span>
+<span class="sd">desynchronisation impossible.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.models.potentials</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasePotential</span>
+
+
+<div class="viewcode-block" id="QuantumSystem">
+<a class="viewcode-back" href="../../../index.html#src.models.states.QuantumSystem">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">QuantumSystem</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Immutable domain model encapsulating a solved 1D quantum system.</span>
+
+<span class="sd">    Bundles the spatial grid, eigenvalues, normalised eigenvectors, and the</span>
+<span class="sd">    originating potential into a single validated object.  All data is</span>
+<span class="sd">    accessible through read-only properties; no public attribute permits</span>
+<span class="sd">    post-construction mutation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        energies: 1D float64 array of shape ``(n_states,)`` containing the</span>
+<span class="sd">            eigenvalues :math:`E_n` in dimensionless units of :math:`E_1`,</span>
+<span class="sd">            sorted in ascending order.</span>
+<span class="sd">        wavefunctions: 2D float64 array of shape ``(n_points, n_states)``</span>
+<span class="sd">            where column ``k`` is :math:`\\psi_k(x)`, normalised so that</span>
+<span class="sd">            :math:`\\int |\\psi_k|^2\\, dx = 1`.</span>
+<span class="sd">        x_grid: 1D float64 array of shape ``(n_points,)`` containing the</span>
+<span class="sd">            spatial coordinates in dimensionless length units on which every</span>
+<span class="sd">            column of ``wavefunctions`` is defined.</span>
+<span class="sd">        potential: The concrete :class:`~src.models.potentials.BasePotential`</span>
+<span class="sd">            instance that was solved.  Retained for provenance — it carries</span>
+<span class="sd">            both the geometry and the :class:`~src.models.config.PhysicsConfig`</span>
+<span class="sd">            used during the solve.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If ``len(energies) != wavefunctions.shape[1]``,</span>
+<span class="sd">            meaning the number of eigenvalues does not match the number of</span>
+<span class="sd">            wavefunction columns (state-count desynchronisation).</span>
+<span class="sd">        ValueError: If ``len(x_grid) != wavefunctions.shape[0]``,</span>
+<span class="sd">            meaning the spatial grid length does not match the wavefunction</span>
+<span class="sd">            row count (grid-wavefunction desynchronisation).</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; from src.core import NumerovSolver</span>
+<span class="sd">        &gt;&gt;&gt; from src.models import InfiniteSquareWell</span>
+<span class="sd">        &gt;&gt;&gt; system = NumerovSolver().solve(InfiniteSquareWell(), n_states=5)</span>
+<span class="sd">        &gt;&gt;&gt; system.n_states</span>
+<span class="sd">        5</span>
+<span class="sd">        &gt;&gt;&gt; system.ground_state_energy   # should be ≈ 1.0 in E₁ units</span>
+<span class="sd">        1.0</span>
+<span class="sd">        &gt;&gt;&gt; prob = system.get_probability_density(0)  # |ψ₁(x)|²</span>
+<span class="sd">        &gt;&gt;&gt; prob.shape == system.x_grid.shape</span>
+<span class="sd">        True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">energies</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>
+        <span class="n">wavefunctions</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>
+        <span class="n">x_grid</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>
+        <span class="n">potential</span><span class="p">:</span> <span class="n">BasePotential</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validates shapes and stores all data as private attributes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            energies: Eigenvalue array of shape ``(n_states,)``.</span>
+<span class="sd">            wavefunctions: Eigenvector matrix of shape ``(n_points, n_states)``.</span>
+<span class="sd">            x_grid: Spatial coordinate array of shape ``(n_points,)``.</span>
+<span class="sd">            potential: The :class:`~src.models.potentials.BasePotential` that</span>
+<span class="sd">                was solved to produce these eigenpairs.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the energy count does not match the wavefunction</span>
+<span class="sd">                column count (state-count desynchronisation).</span>
+<span class="sd">            ValueError: If the grid length does not match the wavefunction</span>
+<span class="sd">                row count (grid-wavefunction desynchronisation).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_states</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">energies</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">n_wf_states</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">wavefunctions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">n_points_wf</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">wavefunctions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">n_points_grid</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x_grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">n_states</span> <span class="o">!=</span> <span class="n">n_wf_states</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;State-count desynchronisation: len(energies)=</span><span class="si">{</span><span class="n">n_states</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;!= wavefunctions.shape[1]=</span><span class="si">{</span><span class="n">n_wf_states</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">n_points_grid</span> <span class="o">!=</span> <span class="n">n_points_wf</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Grid-wavefunction desynchronisation: len(x_grid)=</span><span class="si">{</span><span class="n">n_points_grid</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;!= wavefunctions.shape[0]=</span><span class="si">{</span><span class="n">n_points_wf</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Store everything as private — all access goes through read-only properties.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_energies</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">energies</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wavefunctions</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavefunctions</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_grid</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_grid</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_potential</span><span class="p">:</span> <span class="n">BasePotential</span> <span class="o">=</span> <span class="n">potential</span>
+
+    <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="c1"># Read-only properties — raw data access</span>
+    <span class="c1"># ------------------------------------------------------------------</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">energies</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;NDArray[np.float64]: Eigenvalues :math:`E_n`, shape ``(n_states,)``.</span>
+
+<span class="sd">        Returned as a read-only view; modifying the returned array does not</span>
+<span class="sd">        affect the internal state of this object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energies</span><span class="o">.</span><span class="n">view</span><span class="p">()</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">writeable</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">view</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wavefunctions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;NDArray[np.float64]: Normalised :math:`\\psi_n(x)`, shape ``(n_points, n_states)``.</span>
+
+<span class="sd">        Column ``k`` corresponds to the ``k``-th eigenstate.  Returned as a</span>
+<span class="sd">        read-only view.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wavefunctions</span><span class="o">.</span><span class="n">view</span><span class="p">()</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">writeable</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">view</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">x_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;NDArray[np.float64]: Spatial coordinates in dimensionless length units, shape ``(n_points,)``.</span>
+
+<span class="sd">        The spatial axis shared by all wavefunction columns.  Returned as a</span>
+<span class="sd">        read-only view.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_grid</span><span class="o">.</span><span class="n">view</span><span class="p">()</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">writeable</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">view</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">potential</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BasePotential</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;BasePotential: The originating potential instance, read-only.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_potential</span>
+
+    <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="c1"># Derived read-only properties — computed on demand</span>
+    <span class="c1"># ------------------------------------------------------------------</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_states</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int: Number of eigenstates contained in this system.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_energies</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ground_state_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Energy of the lowest eigenstate :math:`E_1` in units of :math:`E_1`.</span>
+
+<span class="sd">        Equivalent to ``self.energies[0]``, provided as a named property for</span>
+<span class="sd">        readability in downstream code (e.g. thermal partition functions).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_energies</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="c1"># Public query methods</span>
+    <span class="c1"># ------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="QuantumSystem.get_probability_density">
+<a class="viewcode-back" href="../../../index.html#src.models.states.QuantumSystem.get_probability_density">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_probability_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the probability density :math:`|\\psi_n(x)|^2` for one eigenstate.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            state_index: Zero-based index of the eigenstate.  ``0`` is the</span>
+<span class="sd">                ground state, ``1`` is the first excited state, and so on.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            1D float64 array of shape ``(n_points,)`` containing</span>
+<span class="sd">            :math:`|\\psi_n(x)|^2` evaluated on ``self.x_grid``.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            IndexError: If ``state_index`` is outside ``[0, n_states)``.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; rho = system.get_probability_density(0)  # ground state density</span>
+<span class="sd">            &gt;&gt;&gt; from scipy.integrate import trapezoid</span>
+<span class="sd">            &gt;&gt;&gt; trapezoid(rho, system.x_grid)  # ≈ 1.0 by normalisation</span>
+<span class="sd">            1.0</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">state_index</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_states</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;state_index=</span><span class="si">{</span><span class="n">state_index</span><span class="si">}</span><span class="s2"> is out of range for a system &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_states</span><span class="si">}</span><span class="s2"> states (valid: 0 to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_states</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">).&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wavefunctions</span><span class="p">[:,</span> <span class="n">state_index</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span></div>
+
+
+<div class="viewcode-block" id="QuantumSystem.get_state">
+<a class="viewcode-back" href="../../../index.html#src.models.states.QuantumSystem.get_state">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the wavefunction :math:`\\psi_n(x)` for one eigenstate.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            state_index: Zero-based index of the eigenstate.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            1D float64 array of shape ``(n_points,)`` containing</span>
+<span class="sd">            :math:`\\psi_n(x)` on ``self.x_grid``.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            IndexError: If ``state_index`` is outside ``[0, n_states)``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">state_index</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_states</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;state_index=</span><span class="si">{</span><span class="n">state_index</span><span class="si">}</span><span class="s2"> is out of range for a system &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_states</span><span class="si">}</span><span class="s2"> states (valid: 0 to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_states</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">).&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wavefunctions</span><span class="p">[:,</span> <span class="n">state_index</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+
+    <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="c1"># Dunder helpers</span>
+    <span class="c1"># ------------------------------------------------------------------</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns an unambiguous string representation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A string summarising the potential type, number of states, and</span>
+<span class="sd">            ground-state energy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;QuantumSystem(&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;potential=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_potential</span><span class="si">!r}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;n_states=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_states</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;E_0=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ground_state_energy</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Pablo Sanchez, Juan Montoya.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
