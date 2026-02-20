@@ -8,6 +8,7 @@ from .potentials import (
     InfiniteSquareWell,
     VShapedPotential,
 )
+from .states import QuantumSystem
 
 __all__ = [
     "PhysicsConfig",
@@ -17,4 +18,5 @@ __all__ = [
     "FiniteSquareWell",
     "HarmonicPotential",
     "VShapedPotential",
+    "QuantumSystem",
 ]

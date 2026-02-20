@@ -92,6 +92,7 @@ from scipy.linalg import eigh
 
 from src.models.config import NumericalConfig, PhysicsConfig
 from src.models.potentials import BasePotential
+from src.models.states import QuantumSystem
 
 
 # ---------------------------------------------------------------------------
@@ -119,11 +120,11 @@ class BaseSolver(ABC):
                     self,
                     potential: BasePotential,
                     n_states: int = 20,
-                ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+                ) -> QuantumSystem:
                     ...  # shooting-method implementation
 
             experiment: BaseSolver = ShootingSolver()
-            energies, psi = experiment.solve(InfiniteSquareWell())
+            system = experiment.solve(InfiniteSquareWell())
     """
 
     @abstractmethod
@@ -131,7 +132,7 @@ class BaseSolver(ABC):
         self,
         potential: BasePotential,
         n_states: int = 20,
-    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    ) -> QuantumSystem:
         """Solves the 1D TISE and returns the lowest ``n_states`` eigenpairs.
 
         Args:
@@ -141,15 +142,9 @@ class BaseSolver(ABC):
                 compute.  Must be at least 1.
 
         Returns:
-            A tuple ``(energies, wavefunctions)`` where:
-
-            - ``energies`` — 1D float64 array of shape ``(n_states,)``
-              containing :math:`E_n` in dimensionless units of :math:`E_1`,
-              sorted in ascending order.
-            - ``wavefunctions`` — 2D float64 array of shape
-              ``(n_points, n_states)`` where column ``k`` is
-              :math:`\\psi_k(x)`, normalised so that
-              :math:`\\int |\\psi_k|^2\\, dx = 1`.
+            A :class:`~src.models.states.QuantumSystem` containing the
+            spatial grid, eigenvalues :math:`E_n`, normalised eigenvectors
+            :math:`\\psi_n(x)`, and a reference to the originating potential.
 
         Raises:
             ValueError: If ``n_states < 1``.
@@ -215,8 +210,8 @@ class NumerovSolver(BaseSolver):
         self,
         potential: BasePotential,
         n_states: int = 20,
-    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-        """Solves the 1D TISE for the given potential and returns eigenpairs.
+    ) -> QuantumSystem:
+        """Solves the 1D TISE for the given potential and returns a QuantumSystem.
 
         The method follows these steps:
 
@@ -235,6 +230,10 @@ class NumerovSolver(BaseSolver):
            :math:`E_n = \\varepsilon_n \\hbar^2 / (2m)`.
         5. **Normalisation**: Calls :meth:`_normalize` on each wavefunction
            so that :math:`\\int |\\psi_n(x)|^2\\, dx = 1`.
+        6. **Wrapping**: Bundles the spatial grid, energies, wavefunctions,
+           and originating potential into a :class:`~src.models.states.QuantumSystem`
+           domain model, enforcing shape consistency and eliminating data
+           desynchronisation.
 
         Args:
             potential: Any concrete :class:`~src.models.potentials.BasePotential`
@@ -246,14 +245,16 @@ class NumerovSolver(BaseSolver):
                 Defaults to 20.
 
         Returns:
-            A tuple ``(energies, wavefunctions)`` where:
+            A :class:`~src.models.states.QuantumSystem` containing:
 
-            - ``energies`` is a 1D float64 array of shape ``(n_states,)``
+            - ``energies`` — 1D float64 array of shape ``(n_states,)``
               containing :math:`E_n` in dimensionless units of :math:`E_1`.
-            - ``wavefunctions`` is a 2D float64 array of shape
+            - ``wavefunctions`` — 2D float64 array of shape
               ``(n_points, n_states)`` where column ``k`` is
               :math:`\\psi_k(x)`, normalised so that
               :math:`\\int |\\psi_k|^2\\, dx = 1`.
+            - ``x_grid`` — the uniform spatial coordinate array.
+            - ``potential`` — the originating :class:`~src.models.potentials.BasePotential`.
 
         Raises:
             ValueError: If ``n_states < 1`` or if the grid has fewer than 3
@@ -369,7 +370,17 @@ class NumerovSolver(BaseSolver):
         for k in range(n_req):
             psi_full[:, k] = self._normalize(x, psi_full[:, k])
 
-        return energies, psi_full
+        # ── 9. Wrap into QuantumSystem domain model ───────────────────────────
+        # Bundling eliminates data desynchronisation: x, energies, and
+        # wavefunctions are created together and validated together.  A consumer
+        # can never accidentally pair wavefunctions from one solve call with a
+        # grid rebuilt with different parameters.
+        return QuantumSystem(
+            energies=energies,
+            wavefunctions=psi_full,
+            x_grid=x,
+            potential=potential,
+        )
 
     # ------------------------------------------------------------------
     # Private helpers
