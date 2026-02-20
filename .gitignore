@@ -17,5 +17,10 @@ __pycache__/
 # Data/OS junk
 .DS_Store
 
+# Test visual outputs — generated artifacts, never committed.
+# The directory structure is tracked via test/visual_validation/.gitkeep
+test/visual_validation/*
+!test/visual_validation/.gitkeep
+
 # Ignore the generated PDF version of the notebook
 legacy/*.pdf
