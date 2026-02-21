@@ -1,0 +1,1481 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Physics Models &#8212; Thermal-Quantum-Numerov-Solver 1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'physics_api';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Solvers &amp; Statistics Engine" href="solvers_api.html" />
+    <link rel="prev" title="Configuration Layer" href="config_api.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">Numerov Solver</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="config_api.html">
+    Configuration Layer
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Physics Models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="solvers_api.html">
+    Solvers & Statistics Engine
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="viz_api.html">
+    Visualization
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SiririComun/Thermal-Quantum-Numerov-Solver" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="config_api.html">
+    Configuration Layer
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Physics Models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="solvers_api.html">
+    Solvers & Statistics Engine
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="viz_api.html">
+    Visualization
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SiririComun/Thermal-Quantum-Numerov-Solver" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Physics Models</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="physics-models">
+<h1>Physics Models<a class="headerlink" href="#physics-models" title="Link to this heading">#</a></h1>
+<p>This page documents the <strong>potential geometry</strong> and the <strong>quantum-state
+container</strong> — the two model objects that flow through the entire pipeline.</p>
+<section id="potential-definitions">
+<h2>Potential Definitions<a class="headerlink" href="#potential-definitions" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">BasePotential</span></code> is the <strong>Abstract Base Class</strong> that defines the interface
+contract every potential must satisfy.  The <code class="docutils literal notranslate"><span class="pre">NumerovSolver</span></code> depends
+<em>only</em> on this abstract type, never on any concrete subclass — a strict
+application of the <strong>Dependency Inversion Principle</strong>.</p>
+<p>The four concrete potentials faithfully reproduce the wells defined in
+<code class="docutils literal notranslate"><span class="pre">legacy/research_prototype.ipynb</span></code>:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 22.0%" />
+<col style="width: 78.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Class</p></th>
+<th class="head"><p>Physics</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">InfiniteSquareWell</span></code></p></td>
+<td><p>Hard-wall box.  Analytical spectrum: <span class="math notranslate nohighlight">\(E_n = n^2\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">FiniteSquareWell</span></code></p></td>
+<td><p>Flat-bottom well of depth <span class="math notranslate nohighlight">\(V_0\)</span>.  Evanescent decay into barrier.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">HarmonicPotential</span></code></p></td>
+<td><p>Truncated parabola <span class="math notranslate nohighlight">\(V = \tfrac{1}{2}m\omega^2 x^2\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">VShapedPotential</span></code></p></td>
+<td><p>Truncated linear (V-shape) <span class="math notranslate nohighlight">\(V = \lambda|x - L/2|\)</span>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p id="module-src.models.potentials">Abstract base class and concrete implementations for 1D quantum potentials.</p>
+<p>This module defines the <code class="docutils literal notranslate"><span class="pre">BasePotential</span></code> interface and four concrete
+subclasses that faithfully reproduce the potential functions found in
+<code class="docutils literal notranslate"><span class="pre">legacy/research_prototype.ipynb</span></code>:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#src.models.potentials.InfiniteSquareWell" title="src.models.potentials.InfiniteSquareWell"><code class="xref py py-class docutils literal notranslate"><span class="pre">InfiniteSquareWell</span></code></a> — Analytical infinite-barrier box.</p></li>
+<li><p><a class="reference internal" href="#src.models.potentials.FiniteSquareWell" title="src.models.potentials.FiniteSquareWell"><code class="xref py py-class docutils literal notranslate"><span class="pre">FiniteSquareWell</span></code></a>   — Flat-bottom well with finite barriers.</p></li>
+<li><p><a class="reference internal" href="#src.models.potentials.HarmonicPotential" title="src.models.potentials.HarmonicPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonicPotential</span></code></a>  — Truncated harmonic oscillator (parabolic).</p></li>
+<li><p><a class="reference internal" href="#src.models.potentials.VShapedPotential" title="src.models.potentials.VShapedPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">VShapedPotential</span></code></a>   — Truncated V-shape (linear) potential.</p></li>
+</ul>
+<p>All subclasses accept a <a class="reference internal" href="config_api.html#src.models.config.PhysicsConfig" title="src.models.config.PhysicsConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicsConfig</span></code></a> object
+for their physical constants, enforcing Dependency Injection and eliminating
+global-constant coupling.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.models.potentials.BasePotential">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">src.models.potentials.</span></span><span class="sig-name descname"><span class="pre">BasePotential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_api.html#src.models.config.PhysicsConfig" title="src.models.config.PhysicsConfig"><span class="pre">PhysicsConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/models/potentials.html#BasePotential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.BasePotential" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract interface for all 1D quantum potential definitions.</p>
+<p>Every potential that participates in the Numerov eigenvalue pipeline must
+implement this contract.  The <code class="xref py py-class docutils literal notranslate"><span class="pre">NumerovSolver</span></code>
+depends <em>only</em> on this interface, so new geometries (e.g. a double well)
+can be added in a new subclass without ever modifying the solver — in
+strict compliance with the Open-Closed Principle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – Frozen dataclass holding the dimensionless physical constants
+(<code class="docutils literal notranslate"><span class="pre">hbar</span></code>, <code class="docutils literal notranslate"><span class="pre">mass</span></code>, <code class="docutils literal notranslate"><span class="pre">kb</span></code>, <code class="docutils literal notranslate"><span class="pre">well_width</span></code>) used throughout the
+simulation.  Defaults to the standard reduced-unit set
+(<code class="docutils literal notranslate"><span class="pre">hbar=1</span></code>, <code class="docutils literal notranslate"><span class="pre">mass=0.5</span></code>, <code class="docutils literal notranslate"><span class="pre">L=pi</span></code>) that makes the infinite-well
+spectrum satisfy <span class="math notranslate nohighlight">\(E_n = n^2\)</span>.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.potentials.BasePotential.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_api.html#src.models.config.PhysicsConfig" title="src.models.config.PhysicsConfig"><span class="pre">PhysicsConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/src/models/potentials.html#BasePotential.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.BasePotential.__init__" title="Link to this definition">#</a></dt>
+<dd><p>Stores the injected physics configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – Physics constants dataclass.  When <code class="docutils literal notranslate"><span class="pre">None</span></code>, the standard
+dimensionless defaults are used automatically.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.models.potentials.BasePotential.config">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">config</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config_api.html#src.models.config.PhysicsConfig" title="src.models.config.PhysicsConfig"><span class="pre">PhysicsConfig</span></a></span><a class="headerlink" href="#src.models.potentials.BasePotential.config" title="Link to this definition">#</a></dt>
+<dd><p>The injected physics constants, read-only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="config_api.html#src.models.config.PhysicsConfig" title="src.models.config.PhysicsConfig">PhysicsConfig</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.potentials.BasePotential.evaluate">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/models/potentials.html#BasePotential.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.BasePotential.evaluate" title="Link to this definition">#</a></dt>
+<dd><p>Evaluates the potential energy <span class="math notranslate nohighlight">\(V(x)\)</span> at each grid point.</p>
+<p>This is the primary contract method consumed by the Numerov solver.
+All values are returned in dimensionless energy units of <span class="math notranslate nohighlight">\(E_1\)</span>,
+where <span class="math notranslate nohighlight">\(E_1 = \hbar^2 / (2m)\)</span> with the defaults <code class="docutils literal notranslate"><span class="pre">hbar=1</span></code>,
+<code class="docutils literal notranslate"><span class="pre">mass=0.5</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> – 1D array of spatial coordinates in dimensionless length units
+(e.g. <span class="math notranslate nohighlight">\(x/L\)</span> or literal position when <span class="math notranslate nohighlight">\(L = \pi\)</span>).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1D float64 array with the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code> containing
+<span class="math notranslate nohighlight">\(V(x)\)</span> values.  Barrier regions may contain <code class="docutils literal notranslate"><span class="pre">np.inf</span></code>
+for infinite-wall geometries.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.potentials.BasePotential.get_domain">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_domain</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/models/potentials.html#BasePotential.get_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.BasePotential.get_domain" title="Link to this definition">#</a></dt>
+<dd><p>Returns the recommended spatial domain <span class="math notranslate nohighlight">\([x_{min}, x_{max}]\)</span>.</p>
+<p>The Numerov solver calls this method to build the spatial grid without
+any hardcoded geometry knowledge.  The domain should comfortably
+contain both the classically allowed region and (for finite barriers)
+the evanescent tunnelling tails.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <code class="docutils literal notranslate"><span class="pre">(x_min,</span> <span class="pre">x_max)</span></code> tuple in dimensionless length units.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>A finite well of width <span class="math notranslate nohighlight">\(L = \pi\)</span> returns:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">well</span> <span class="o">=</span> <span class="n">FiniteSquareWell</span><span class="p">(</span><span class="n">v0</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">well</span><span class="o">.</span><span class="n">get_domain</span><span class="p">()</span>
+<span class="go">(-1.5707963267948966, 4.71238898038469)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.models.potentials.InfiniteSquareWell">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">src.models.potentials.</span></span><span class="sig-name descname"><span class="pre">InfiniteSquareWell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_api.html#src.models.config.PhysicsConfig" title="src.models.config.PhysicsConfig"><span class="pre">PhysicsConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/models/potentials.html#InfiniteSquareWell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.InfiniteSquareWell" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePotential</span></code></a></p>
+<p>Infinite square-well potential with exact Dirichlet boundary conditions.</p>
+<p>The potential is defined as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}V(x) =
+\begin{cases}
+    0       &amp; \text{if } 0 \le x \le L \\
+    +\infty &amp; \text{otherwise}
+\end{cases}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(L\)</span> = <code class="docutils literal notranslate"><span class="pre">config.well_width</span></code> (default <span class="math notranslate nohighlight">\(\pi\)</span>).</p>
+<p>This geometry has an exact analytical eigenspectrum given by
+<span class="math notranslate nohighlight">\(E_n = n^2\)</span> in the dimensionless unit system (<code class="docutils literal notranslate"><span class="pre">hbar=1</span></code>,
+<code class="docutils literal notranslate"><span class="pre">mass=0.5</span></code>, <span class="math notranslate nohighlight">\(L=\pi\)</span>), which is used as the reference baseline
+throughout the project.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – Physics constants.  Reads <code class="docutils literal notranslate"><span class="pre">well_width</span></code> to locate the right
+wall of the box.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">well</span> <span class="o">=</span> <span class="n">InfiniteSquareWell</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">+</span> <span class="mf">0.1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">well</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="go">array([inf,  0.,  0.,  0., inf])</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.potentials.InfiniteSquareWell.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/models/potentials.html#InfiniteSquareWell.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.InfiniteSquareWell.evaluate" title="Link to this definition">#</a></dt>
+<dd><p>Returns <span class="math notranslate nohighlight">\(V(x)\)</span> with <span class="math notranslate nohighlight">\(+\infty\)</span> walls at <span class="math notranslate nohighlight">\(x=0\)</span> and <span class="math notranslate nohighlight">\(x=L\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> – 1D array of spatial coordinates in dimensionless length units.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Float64 array of the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.  Values outside
+<span class="math notranslate nohighlight">\([0, L]\)</span> are set to <code class="docutils literal notranslate"><span class="pre">np.inf</span></code>; values inside are <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.potentials.InfiniteSquareWell.get_domain">
+<span class="sig-name descname"><span class="pre">get_domain</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/models/potentials.html#InfiniteSquareWell.get_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.InfiniteSquareWell.get_domain" title="Link to this definition">#</a></dt>
+<dd><p>Returns <span class="math notranslate nohighlight">\([0, L]\)</span> — the exact physical domain of the box.</p>
+<p>The solver requires Dirichlet conditions at both ends, so no external
+margin is needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The tuple <code class="docutils literal notranslate"><span class="pre">(0.0,</span> <span class="pre">well_width)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.models.potentials.FiniteSquareWell">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">src.models.potentials.</span></span><span class="sig-name descname"><span class="pre">FiniteSquareWell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_api.html#src.models.config.PhysicsConfig" title="src.models.config.PhysicsConfig"><span class="pre">PhysicsConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/models/potentials.html#FiniteSquareWell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.FiniteSquareWell" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePotential</span></code></a></p>
+<p>Finite square-well potential with flat barriers.</p>
+<p>Faithfully reproduces <code class="docutils literal notranslate"><span class="pre">get_potential(x,</span> <span class="pre">V0,</span> <span class="pre">well_width)</span></code> from
+<code class="docutils literal notranslate"><span class="pre">legacy/research_prototype.ipynb</span></code>.</p>
+<p>The potential is defined as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}V(x) =
+\begin{cases}
+    0    &amp; \text{if } 0 \le x \le w \\
+    V_0  &amp; \text{otherwise}
+\end{cases}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(w\)</span> is the <code class="docutils literal notranslate"><span class="pre">width</span></code> parameter and <span class="math notranslate nohighlight">\(V_0\)</span> is the
+barrier height.</p>
+<p>The returned domain adds a half-width margin on the left and a
+full-width margin on the right — identical to the legacy constants
+<code class="docutils literal notranslate"><span class="pre">X_MIN</span> <span class="pre">=</span> <span class="pre">-L/2</span></code>, <code class="docutils literal notranslate"><span class="pre">X_MAX</span> <span class="pre">=</span> <span class="pre">3L/2</span></code> — to capture the evanescent
+tunnelling tails that extend into the barrier region.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>v0</strong> – Barrier height in dimensionless energy units of <span class="math notranslate nohighlight">\(E_1\)</span>.
+The legacy study uses <code class="docutils literal notranslate"><span class="pre">v0</span> <span class="pre">∈</span> <span class="pre">{10,</span> <span class="pre">50,</span> <span class="pre">1000}</span></code>.</p></li>
+<li><p><strong>width</strong> – Well width in dimensionless length units.  Defaults to
+<code class="docutils literal notranslate"><span class="pre">config.well_width</span></code> (i.e. <span class="math notranslate nohighlight">\(\pi\)</span>) when <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>config</strong> – Physics constants.  Reads <code class="docutils literal notranslate"><span class="pre">well_width</span></code> as the fallback
+when <code class="docutils literal notranslate"><span class="pre">width</span></code> is not provided.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">v0</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">width</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code>.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">well</span> <span class="o">=</span> <span class="n">FiniteSquareWell</span><span class="p">(</span><span class="n">v0</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">well</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="go">array([10. ,  0. ,  0. ,  0. , 10. ])</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.potentials.FiniteSquareWell.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_api.html#src.models.config.PhysicsConfig" title="src.models.config.PhysicsConfig"><span class="pre">PhysicsConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/src/models/potentials.html#FiniteSquareWell.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.FiniteSquareWell.__init__" title="Link to this definition">#</a></dt>
+<dd><p>Initialises the finite square well.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>v0</strong> – Barrier height <span class="math notranslate nohighlight">\(V_0 \ge 0\)</span>.</p></li>
+<li><p><strong>width</strong> – Well width.  Defaults to <code class="docutils literal notranslate"><span class="pre">config.well_width</span></code> when
+<code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>config</strong> – Physics constants dataclass.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">v0</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> or the resolved <code class="docutils literal notranslate"><span class="pre">width</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.models.potentials.FiniteSquareWell.v0">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">v0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#src.models.potentials.FiniteSquareWell.v0" title="Link to this definition">#</a></dt>
+<dd><p>Barrier height in dimensionless energy units.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.models.potentials.FiniteSquareWell.width">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">width</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#src.models.potentials.FiniteSquareWell.width" title="Link to this definition">#</a></dt>
+<dd><p>Well width in dimensionless length units.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.potentials.FiniteSquareWell.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/models/potentials.html#FiniteSquareWell.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.FiniteSquareWell.evaluate" title="Link to this definition">#</a></dt>
+<dd><p>Returns <span class="math notranslate nohighlight">\(V(x) = 0\)</span> inside <span class="math notranslate nohighlight">\([0, w]\)</span>, <span class="math notranslate nohighlight">\(V_0\)</span> outside.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> – 1D array of spatial coordinates in dimensionless length units.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Float64 array of the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.potentials.FiniteSquareWell.get_domain">
+<span class="sig-name descname"><span class="pre">get_domain</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/models/potentials.html#FiniteSquareWell.get_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.FiniteSquareWell.get_domain" title="Link to this definition">#</a></dt>
+<dd><p>Returns the extended domain <span class="math notranslate nohighlight">\([-w/2,\, 3w/2]\)</span>.</p>
+<p>The half-width left margin and full-width right margin replicate the
+legacy grid <code class="docutils literal notranslate"><span class="pre">X_MIN</span> <span class="pre">=</span> <span class="pre">-L/2</span></code>, <code class="docutils literal notranslate"><span class="pre">X_MAX</span> <span class="pre">=</span> <span class="pre">3L/2</span></code>, ensuring sufficient
+room for the evanescent wave tails to decay to zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The tuple <code class="docutils literal notranslate"><span class="pre">(-width/2,</span> <span class="pre">3*width/2)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.models.potentials.HarmonicPotential">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">src.models.potentials.</span></span><span class="sig-name descname"><span class="pre">HarmonicPotential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v0_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">60.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.5707963267948966</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_api.html#src.models.config.PhysicsConfig" title="src.models.config.PhysicsConfig"><span class="pre">PhysicsConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/models/potentials.html#HarmonicPotential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.HarmonicPotential" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePotential</span></code></a></p>
+<p>Truncated harmonic oscillator (parabolic) potential.</p>
+<p>Faithfully reproduces <code class="docutils literal notranslate"><span class="pre">potential_harmonic_finite(x,</span> <span class="pre">V0,</span> <span class="pre">omega,</span> <span class="pre">center)</span></code>
+from <code class="docutils literal notranslate"><span class="pre">legacy/research_prototype.ipynb</span></code>.</p>
+<p>The potential is defined as:</p>
+<div class="math notranslate nohighlight">
+\[V(x) = \min\!\left(\frac{1}{2} m\,\omega^2 (x - x_c)^2,\; V_{\rm lim}\right)\]</div>
+<p>where <span class="math notranslate nohighlight">\(m\)</span> = <code class="docutils literal notranslate"><span class="pre">config.mass</span></code>, <span class="math notranslate nohighlight">\(\omega\)</span> is the angular
+frequency, <span class="math notranslate nohighlight">\(x_c\)</span> is the well centre, and <span class="math notranslate nohighlight">\(V_{\rm lim}\)</span> is
+the truncation ceiling.  Truncation ensures finite barrier heights for
+numerical tractability without unphysical divergence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>omega</strong> – Angular frequency <span class="math notranslate nohighlight">\(\omega\)</span> in dimensionless units.
+Legacy default is <code class="docutils literal notranslate"><span class="pre">2.2</span></code>.</p></li>
+<li><p><strong>v0_limit</strong> – Truncation ceiling <span class="math notranslate nohighlight">\(V_{\rm lim}\)</span> in dimensionless
+energy units.  Legacy default is <code class="docutils literal notranslate"><span class="pre">60.0</span></code>.</p></li>
+<li><p><strong>center</strong> – Position of the parabolic minimum <span class="math notranslate nohighlight">\(x_c\)</span> in
+dimensionless length units.  Legacy default is <span class="math notranslate nohighlight">\(\pi/2\)</span>.</p></li>
+<li><p><strong>config</strong> – Physics constants.  Reads <code class="docutils literal notranslate"><span class="pre">mass</span></code> for the prefactor
+<span class="math notranslate nohighlight">\(\frac{1}{2} m \omega^2\)</span>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">omega</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">v0_limit</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code>.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span><span class="o">,</span><span class="w"> </span><span class="nn">math</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pot</span> <span class="o">=</span> <span class="n">HarmonicPotential</span><span class="p">(</span><span class="n">omega</span><span class="o">=</span><span class="mf">2.2</span><span class="p">,</span> <span class="n">v0_limit</span><span class="o">=</span><span class="mf">60.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pot</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]))</span>   <span class="c1"># minimum at centre</span>
+<span class="go">array([0.])</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.potentials.HarmonicPotential.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v0_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">60.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.5707963267948966</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_api.html#src.models.config.PhysicsConfig" title="src.models.config.PhysicsConfig"><span class="pre">PhysicsConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/src/models/potentials.html#HarmonicPotential.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.HarmonicPotential.__init__" title="Link to this definition">#</a></dt>
+<dd><p>Initialises the truncated harmonic potential.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>omega</strong> – Angular frequency <span class="math notranslate nohighlight">\(\omega &gt; 0\)</span>.</p></li>
+<li><p><strong>v0_limit</strong> – Truncation ceiling <span class="math notranslate nohighlight">\(V_{\rm lim} &gt; 0\)</span>.</p></li>
+<li><p><strong>center</strong> – Parabolic minimum position <span class="math notranslate nohighlight">\(x_c\)</span>.</p></li>
+<li><p><strong>config</strong> – Physics constants dataclass.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">omega</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">v0_limit</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.models.potentials.HarmonicPotential.omega">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">omega</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#src.models.potentials.HarmonicPotential.omega" title="Link to this definition">#</a></dt>
+<dd><p>Angular frequency in dimensionless units.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.models.potentials.HarmonicPotential.v0_limit">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">v0_limit</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#src.models.potentials.HarmonicPotential.v0_limit" title="Link to this definition">#</a></dt>
+<dd><p>Truncation ceiling in dimensionless energy units.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.models.potentials.HarmonicPotential.center">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">center</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#src.models.potentials.HarmonicPotential.center" title="Link to this definition">#</a></dt>
+<dd><p>Position of the parabolic minimum in dimensionless length units.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.potentials.HarmonicPotential.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/models/potentials.html#HarmonicPotential.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.HarmonicPotential.evaluate" title="Link to this definition">#</a></dt>
+<dd><p>Returns <span class="math notranslate nohighlight">\(V(x) = \min(\tfrac{1}{2}m\omega^2(x-x_c)^2,\, V_{\rm lim})\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> – 1D array of spatial coordinates in dimensionless length units.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Float64 array of the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.potentials.HarmonicPotential.get_domain">
+<span class="sig-name descname"><span class="pre">get_domain</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/models/potentials.html#HarmonicPotential.get_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.HarmonicPotential.get_domain" title="Link to this definition">#</a></dt>
+<dd><p>Returns a domain that fully contains both well and barrier regions.</p>
+<p>The truncation radius <span class="math notranslate nohighlight">\(r_t = \sqrt{2 V_{\rm lim} / (m\omega^2)}\)</span>
+is the distance from the centre at which the parabola reaches
+<span class="math notranslate nohighlight">\(V_{\rm lim}\)</span>.  A 50 % safety margin is added to ensure
+the evanescent tail decays to zero within the grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The tuple <code class="docutils literal notranslate"><span class="pre">(center</span> <span class="pre">-</span> <span class="pre">1.5*r_t,</span> <span class="pre">center</span> <span class="pre">+</span> <span class="pre">1.5*r_t)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.models.potentials.VShapedPotential">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">src.models.potentials.</span></span><span class="sig-name descname"><span class="pre">VShapedPotential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">28.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v0_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">60.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.5707963267948966</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_api.html#src.models.config.PhysicsConfig" title="src.models.config.PhysicsConfig"><span class="pre">PhysicsConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/models/potentials.html#VShapedPotential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.VShapedPotential" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePotential</span></code></a></p>
+<p>Truncated V-shape (linear) potential.</p>
+<p>Faithfully reproduces <code class="docutils literal notranslate"><span class="pre">potential_vshape_finite(x,</span> <span class="pre">V0,</span> <span class="pre">slope,</span> <span class="pre">center)</span></code>
+from <code class="docutils literal notranslate"><span class="pre">legacy/research_prototype.ipynb</span></code>.</p>
+<p>The potential is defined as:</p>
+<div class="math notranslate nohighlight">
+\[V(x) = \min\!\left(s\,|x - x_c|,\; V_{\rm lim}\right)\]</div>
+<p>where <span class="math notranslate nohighlight">\(s\)</span> is the linear slope, <span class="math notranslate nohighlight">\(x_c\)</span> is the cusp centre,
+and <span class="math notranslate nohighlight">\(V_{\rm lim}\)</span> is the truncation ceiling.  The result is a
+tent-shaped well with flat barriers once the slope reaches
+<span class="math notranslate nohighlight">\(V_{\rm lim}\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>slope</strong> – Linear slope <span class="math notranslate nohighlight">\(s\)</span> in dimensionless energy-per-length
+units.  Legacy default is <code class="docutils literal notranslate"><span class="pre">28.0</span></code>.</p></li>
+<li><p><strong>v0_limit</strong> – Truncation ceiling <span class="math notranslate nohighlight">\(V_{\rm lim}\)</span> in dimensionless
+energy units.  Legacy default is <code class="docutils literal notranslate"><span class="pre">60.0</span></code>.</p></li>
+<li><p><strong>center</strong> – Position of the V-cusp <span class="math notranslate nohighlight">\(x_c\)</span> in dimensionless length
+units.  Legacy default is <span class="math notranslate nohighlight">\(\pi/2\)</span>.</p></li>
+<li><p><strong>config</strong> – Physics constants dataclass.  Not required to evaluate this
+potential (no mass dependency), but accepted for interface
+consistency.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">slope</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">v0_limit</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code>.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span><span class="o">,</span><span class="w"> </span><span class="nn">math</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pot</span> <span class="o">=</span> <span class="n">VShapedPotential</span><span class="p">(</span><span class="n">slope</span><span class="o">=</span><span class="mf">28.0</span><span class="p">,</span> <span class="n">v0_limit</span><span class="o">=</span><span class="mf">60.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pot</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]))</span>   <span class="c1"># cusp — minimum is zero</span>
+<span class="go">array([0.])</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.potentials.VShapedPotential.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">28.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v0_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">60.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.5707963267948966</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_api.html#src.models.config.PhysicsConfig" title="src.models.config.PhysicsConfig"><span class="pre">PhysicsConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/src/models/potentials.html#VShapedPotential.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.VShapedPotential.__init__" title="Link to this definition">#</a></dt>
+<dd><p>Initialises the truncated V-shaped potential.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>slope</strong> – Linear slope <span class="math notranslate nohighlight">\(s &gt; 0\)</span>.</p></li>
+<li><p><strong>v0_limit</strong> – Truncation ceiling <span class="math notranslate nohighlight">\(V_{\rm lim} &gt; 0\)</span>.</p></li>
+<li><p><strong>center</strong> – Cusp position <span class="math notranslate nohighlight">\(x_c\)</span>.</p></li>
+<li><p><strong>config</strong> – Physics constants dataclass.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">slope</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">v0_limit</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.models.potentials.VShapedPotential.slope">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">slope</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#src.models.potentials.VShapedPotential.slope" title="Link to this definition">#</a></dt>
+<dd><p>Linear slope in dimensionless energy-per-length units.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.models.potentials.VShapedPotential.v0_limit">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">v0_limit</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#src.models.potentials.VShapedPotential.v0_limit" title="Link to this definition">#</a></dt>
+<dd><p>Truncation ceiling in dimensionless energy units.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.models.potentials.VShapedPotential.center">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">center</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#src.models.potentials.VShapedPotential.center" title="Link to this definition">#</a></dt>
+<dd><p>Cusp position in dimensionless length units.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.potentials.VShapedPotential.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/models/potentials.html#VShapedPotential.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.VShapedPotential.evaluate" title="Link to this definition">#</a></dt>
+<dd><p>Returns <span class="math notranslate nohighlight">\(V(x) = \min(s\,|x - x_c|,\, V_{\rm lim})\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> – 1D array of spatial coordinates in dimensionless length units.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Float64 array of the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.potentials.VShapedPotential.get_domain">
+<span class="sig-name descname"><span class="pre">get_domain</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/models/potentials.html#VShapedPotential.get_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.potentials.VShapedPotential.get_domain" title="Link to this definition">#</a></dt>
+<dd><p>Returns a domain that fully contains the well and flat barriers.</p>
+<p>The truncation radius <span class="math notranslate nohighlight">\(r_t = V_{\rm lim} / s\)</span> is the distance
+from the cusp at which the slope reaches <span class="math notranslate nohighlight">\(V_{\rm lim}\)</span>.  A
+50 % safety margin is added for the evanescent tails.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The tuple <code class="docutils literal notranslate"><span class="pre">(center</span> <span class="pre">-</span> <span class="pre">1.5*r_t,</span> <span class="pre">center</span> <span class="pre">+</span> <span class="pre">1.5*r_t)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<hr class="docutils" />
+<section id="quantum-state-container">
+<h2>Quantum State Container<a class="headerlink" href="#quantum-state-container" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">QuantumSystem</span></code> is the <strong>read-only result object</strong> returned by every solver.
+It wraps the raw NumPy eigenpairs and the originating potential into a
+well-typed, immutable container.  No physics logic lives here — it is pure
+data, accessible through properties only.</p>
+<p id="module-src.models.states">Domain model for the output of a quantum eigenvalue solver.</p>
+<p>The <a class="reference internal" href="#src.models.states.QuantumSystem" title="src.models.states.QuantumSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumSystem</span></code></a> class replaces the raw <code class="docutils literal notranslate"><span class="pre">tuple[NDArray,</span> <span class="pre">NDArray]</span></code>
+previously returned by <a class="reference internal" href="solvers_api.html#src.core.solvers.BaseSolver" title="src.core.solvers.BaseSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSolver</span></code></a>. It solves the
+<strong>Data Desynchronisation</strong> problem: in the legacy prototype, the spatial grid
+<code class="docutils literal notranslate"><span class="pre">x</span></code>, the energy array, and the wavefunction matrix were three separate
+variables that could silently diverge (e.g. if <code class="docutils literal notranslate"><span class="pre">x</span></code> was rebuilt with different
+parameters while the wavefunctions were kept from an earlier run).</p>
+<p><code class="docutils literal notranslate"><span class="pre">QuantumSystem</span></code> bundles all four pieces of a solved quantum problem into a
+single, self-validating, immutable object:</p>
+<ul class="simple">
+<li><p><strong>``x_grid``</strong> — the spatial coordinates on which wavefunctions are defined.</p></li>
+<li><p><strong>``energies``</strong> — the eigenvalues <span class="math notranslate nohighlight">\(E_n\)</span> for each state.</p></li>
+<li><p><strong>``wavefunctions``</strong> — the normalised <span class="math notranslate nohighlight">\(\psi_n(x)\)</span> columns.</p></li>
+<li><p><strong>``potential``</strong> — the <a class="reference internal" href="#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePotential</span></code></a> that
+was solved, providing geometry and physical-constant context.</p></li>
+</ul>
+<p>Shape consistency is enforced at construction time, making silent
+desynchronisation impossible.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.models.states.QuantumSystem">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">src.models.states.</span></span><span class="sig-name descname"><span class="pre">QuantumSystem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavefunctions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">potential</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><span class="pre">BasePotential</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/models/states.html#QuantumSystem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.states.QuantumSystem" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Immutable domain model encapsulating a solved 1D quantum system.</p>
+<p>Bundles the spatial grid, eigenvalues, normalised eigenvectors, and the
+originating potential into a single validated object.  All data is
+accessible through read-only properties; no public attribute permits
+post-construction mutation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>energies</strong> – 1D float64 array of shape <code class="docutils literal notranslate"><span class="pre">(n_states,)</span></code> containing the
+eigenvalues <span class="math notranslate nohighlight">\(E_n\)</span> in dimensionless units of <span class="math notranslate nohighlight">\(E_1\)</span>,
+sorted in ascending order.</p></li>
+<li><p><strong>wavefunctions</strong> – 2D float64 array of shape <code class="docutils literal notranslate"><span class="pre">(n_points,</span> <span class="pre">n_states)</span></code>
+where column <code class="docutils literal notranslate"><span class="pre">k</span></code> is <span class="math notranslate nohighlight">\(\psi_k(x)\)</span>, normalised so that
+<span class="math notranslate nohighlight">\(\int |\psi_k|^2\, dx = 1\)</span>.</p></li>
+<li><p><strong>x_grid</strong> – 1D float64 array of shape <code class="docutils literal notranslate"><span class="pre">(n_points,)</span></code> containing the
+spatial coordinates in dimensionless length units on which every
+column of <code class="docutils literal notranslate"><span class="pre">wavefunctions</span></code> is defined.</p></li>
+<li><p><strong>potential</strong> – The concrete <a class="reference internal" href="#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePotential</span></code></a>
+instance that was solved.  Retained for provenance — it carries
+both the geometry and the <a class="reference internal" href="config_api.html#src.models.config.PhysicsConfig" title="src.models.config.PhysicsConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicsConfig</span></code></a>
+used during the solve.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">len(energies)</span> <span class="pre">!=</span> <span class="pre">wavefunctions.shape[1]</span></code>,
+    meaning the number of eigenvalues does not match the number of
+    wavefunction columns (state-count desynchronisation).</p></li>
+<li><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">len(x_grid)</span> <span class="pre">!=</span> <span class="pre">wavefunctions.shape[0]</span></code>,
+    meaning the spatial grid length does not match the wavefunction
+    row count (grid-wavefunction desynchronisation).</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">src.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumerovSolver</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">src.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfiniteSquareWell</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">system</span> <span class="o">=</span> <span class="n">NumerovSolver</span><span class="p">()</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">InfiniteSquareWell</span><span class="p">(),</span> <span class="n">n_states</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">system</span><span class="o">.</span><span class="n">n_states</span>
+<span class="go">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">system</span><span class="o">.</span><span class="n">ground_state_energy</span>   <span class="c1"># should be ≈ 1.0 in E₁ units</span>
+<span class="go">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prob</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="n">get_probability_density</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># |ψ₁(x)|²</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prob</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">system</span><span class="o">.</span><span class="n">x_grid</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.states.QuantumSystem.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavefunctions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">potential</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><span class="pre">BasePotential</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/src/models/states.html#QuantumSystem.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.states.QuantumSystem.__init__" title="Link to this definition">#</a></dt>
+<dd><p>Validates shapes and stores all data as private attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>energies</strong> – Eigenvalue array of shape <code class="docutils literal notranslate"><span class="pre">(n_states,)</span></code>.</p></li>
+<li><p><strong>wavefunctions</strong> – Eigenvector matrix of shape <code class="docutils literal notranslate"><span class="pre">(n_points,</span> <span class="pre">n_states)</span></code>.</p></li>
+<li><p><strong>x_grid</strong> – Spatial coordinate array of shape <code class="docutils literal notranslate"><span class="pre">(n_points,)</span></code>.</p></li>
+<li><p><strong>potential</strong> – The <a class="reference internal" href="#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePotential</span></code></a> that
+was solved to produce these eigenpairs.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the energy count does not match the wavefunction
+    column count (state-count desynchronisation).</p></li>
+<li><p><strong>ValueError</strong> – If the grid length does not match the wavefunction
+    row count (grid-wavefunction desynchronisation).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.models.states.QuantumSystem.energies">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">energies</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#src.models.states.QuantumSystem.energies" title="Link to this definition">#</a></dt>
+<dd><p>Eigenvalues <span class="math notranslate nohighlight">\(E_n\)</span>, shape <code class="docutils literal notranslate"><span class="pre">(n_states,)</span></code>.</p>
+<p>Returned as a read-only view; modifying the returned array does not
+affect the internal state of this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NDArray[np.float64]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.models.states.QuantumSystem.wavefunctions">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">wavefunctions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#src.models.states.QuantumSystem.wavefunctions" title="Link to this definition">#</a></dt>
+<dd><p>Normalised <span class="math notranslate nohighlight">\(\psi_n(x)\)</span>, shape <code class="docutils literal notranslate"><span class="pre">(n_points,</span> <span class="pre">n_states)</span></code>.</p>
+<p>Column <code class="docutils literal notranslate"><span class="pre">k</span></code> corresponds to the <code class="docutils literal notranslate"><span class="pre">k</span></code>-th eigenstate.  Returned as a
+read-only view.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NDArray[np.float64]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.models.states.QuantumSystem.x_grid">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">x_grid</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#src.models.states.QuantumSystem.x_grid" title="Link to this definition">#</a></dt>
+<dd><p>Spatial coordinates in dimensionless length units, shape <code class="docutils literal notranslate"><span class="pre">(n_points,)</span></code>.</p>
+<p>The spatial axis shared by all wavefunction columns.  Returned as a
+read-only view.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NDArray[np.float64]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.models.states.QuantumSystem.potential">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">potential</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><span class="pre">BasePotential</span></a></span><a class="headerlink" href="#src.models.states.QuantumSystem.potential" title="Link to this definition">#</a></dt>
+<dd><p>The originating potential instance, read-only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential">BasePotential</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.models.states.QuantumSystem.n_states">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">n_states</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#src.models.states.QuantumSystem.n_states" title="Link to this definition">#</a></dt>
+<dd><p>Number of eigenstates contained in this system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.models.states.QuantumSystem.ground_state_energy">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ground_state_energy</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#src.models.states.QuantumSystem.ground_state_energy" title="Link to this definition">#</a></dt>
+<dd><p>Energy of the lowest eigenstate <span class="math notranslate nohighlight">\(E_1\)</span> in units of <span class="math notranslate nohighlight">\(E_1\)</span>.</p>
+<p>Equivalent to <code class="docutils literal notranslate"><span class="pre">self.energies[0]</span></code>, provided as a named property for
+readability in downstream code (e.g. thermal partition functions).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.states.QuantumSystem.get_probability_density">
+<span class="sig-name descname"><span class="pre">get_probability_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/models/states.html#QuantumSystem.get_probability_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.states.QuantumSystem.get_probability_density" title="Link to this definition">#</a></dt>
+<dd><p>Returns the probability density <span class="math notranslate nohighlight">\(|\psi_n(x)|^2\)</span> for one eigenstate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state_index</strong> – Zero-based index of the eigenstate.  <code class="docutils literal notranslate"><span class="pre">0</span></code> is the
+ground state, <code class="docutils literal notranslate"><span class="pre">1</span></code> is the first excited state, and so on.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1D float64 array of shape <code class="docutils literal notranslate"><span class="pre">(n_points,)</span></code> containing
+<span class="math notranslate nohighlight">\(|\psi_n(x)|^2\)</span> evaluated on <code class="docutils literal notranslate"><span class="pre">self.x_grid</span></code>.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>IndexError</strong> – If <code class="docutils literal notranslate"><span class="pre">state_index</span></code> is outside <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">n_states)</span></code>.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rho</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="n">get_probability_density</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># ground state density</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.integrate</span><span class="w"> </span><span class="kn">import</span> <span class="n">trapezoid</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trapezoid</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="n">system</span><span class="o">.</span><span class="n">x_grid</span><span class="p">)</span>  <span class="c1"># ≈ 1.0 by normalisation</span>
+<span class="go">1.0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.states.QuantumSystem.get_state">
+<span class="sig-name descname"><span class="pre">get_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/models/states.html#QuantumSystem.get_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.states.QuantumSystem.get_state" title="Link to this definition">#</a></dt>
+<dd><p>Returns the wavefunction <span class="math notranslate nohighlight">\(\psi_n(x)\)</span> for one eigenstate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state_index</strong> – Zero-based index of the eigenstate.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1D float64 array of shape <code class="docutils literal notranslate"><span class="pre">(n_points,)</span></code> containing
+<span class="math notranslate nohighlight">\(\psi_n(x)\)</span> on <code class="docutils literal notranslate"><span class="pre">self.x_grid</span></code>.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>IndexError</strong> – If <code class="docutils literal notranslate"><span class="pre">state_index</span></code> is outside <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">n_states)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<hr class="docutils" />
+<section id="particle-statistics-enumeration">
+<h2>Particle Statistics Enumeration<a class="headerlink" href="#particle-statistics-enumeration" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ParticleType</span></code> selects the quantum-mechanical symmetry requirement applied
+to the two-particle spatial wavefunction inside <code class="docutils literal notranslate"><span class="pre">ThermalEngine</span></code>.</p>
+<p id="module-src.models.statistics">Particle-statistics enumeration for the two-particle thermal engine.</p>
+<p>This module defines <a class="reference internal" href="#src.models.statistics.ParticleType" title="src.models.statistics.ParticleType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleType</span></code></a>, an enumeration whose members
+select the quantum-mechanical symmetry requirement applied to the two-particle
+spatial wavefunction inside <a class="reference internal" href="solvers_api.html#src.core.statistics.ThermalEngine" title="src.core.statistics.ThermalEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThermalEngine</span></code></a>.</p>
+<section id="background">
+<h3>Background<a class="headerlink" href="#background" title="Link to this heading">#</a></h3>
+<p>The <strong>Symmetry Postulate</strong> of quantum mechanics (Pauli, 1940) states that the
+total wavefunction of a system of <em>identical</em> particles must be either
+<em>completely symmetric</em> (bosons) or <em>completely antisymmetric</em> (fermions) under
+the exchange of any two particles.  Because the total wavefunction factorises
+into a <em>spatial</em> part and a <em>spin</em> part, different spin-multiplet populations
+impose different symmetry requirements on the spatial wavefunction.</p>
+<p>The five members of <a class="reference internal" href="#src.models.statistics.ParticleType" title="src.models.statistics.ParticleType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleType</span></code></a> cover the four cases implemented in
+<code class="docutils literal notranslate"><span class="pre">legacy/research_prototype.ipynb</span></code> plus a classical reference:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 14.0%" />
+<col style="width: 10.0%" />
+<col style="width: 30.0%" />
+<col style="width: 46.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Member</p></th>
+<th class="head"><p>Spin</p></th>
+<th class="head"><p>Spatial symmetry</p></th>
+<th class="head"><p>Physical origin</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>BOLTZMANN</p></td>
+<td><p>—</p></td>
+<td><p>None (distinguishable)</p></td>
+<td><p>Classical / Maxwell–Boltzmann</p></td>
+</tr>
+<tr class="row-odd"><td><p>BOSON</p></td>
+<td><p>integer</p></td>
+<td><p>Symmetric (<span class="math notranslate nohighlight">\(+\)</span>)</p></td>
+<td><p>Integer total spin (e.g. <sup>4</sup> He)</p></td>
+</tr>
+<tr class="row-even"><td><p>FERMION</p></td>
+<td><p>half-int</p></td>
+<td><p>Antisymmetric (<span class="math notranslate nohighlight">\(-\)</span>)</p></td>
+<td><p>Half-integer spin, spin-polarised</p></td>
+</tr>
+<tr class="row-odd"><td><p>SPIN_HALF</p></td>
+<td><p>1/2</p></td>
+<td><p>:math:`  frac{1}{4} P_S +        frac{3}{4} P_A`</p></td>
+<td><p>2-electron mixed-spin state (singlet + triplet)</p></td>
+</tr>
+<tr class="row-even"><td><p>SPIN_ONE</p></td>
+<td><p>1</p></td>
+<td><p>:math:`  frac{2}{3} P_S +        frac{1}{3} P_A`</p></td>
+<td><p>2-boson mixed-spin (spin-1); S=2,0 symmetric, S=1 antisym</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>SPIN_HALF derivation</strong> (spin-1/2 fermions, fully mixed spin state):
+The two-particle spin Hilbert space has dimension 4.  The singlet state
+(<span class="math notranslate nohighlight">\(S=0\)</span>, antisymmetric spin) pairs with a <em>symmetric</em> spatial state so
+that the total wavefunction is antisymmetric; the triplet (<span class="math notranslate nohighlight">\(S=1\)</span>,
+3 symmetric spin states) pairs with an <em>antisymmetric</em> spatial state.
+At infinite temperature, all four spin states are equally likely, giving:</p>
+<div class="math notranslate nohighlight">
+\[P_{\text{SPIN-1/2}} = \frac{1}{4} P_S + \frac{3}{4} P_A\]</div>
+<p><strong>SPIN_ONE derivation</strong> (spin-1 bosons, fully mixed spin state):
+The spin Hilbert space has dimension 9.  States with total spin
+<span class="math notranslate nohighlight">\(S=2\)</span> (5 states, symmetric spin) and <span class="math notranslate nohighlight">\(S=0\)</span> (1 state, symmetric
+spin) require symmetric spatial parts; <span class="math notranslate nohighlight">\(S=1\)</span> (3 states, antisymmetric
+spin) requires an antisymmetric spatial part.  Hence:</p>
+<div class="math notranslate nohighlight">
+\[P_{\text{SPIN-1}} = \frac{6}{9} P_S + \frac{3}{9} P_A
+                   = \frac{2}{3} P_S + \frac{1}{3} P_A\]</div>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.models.statistics.ParticleType">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">src.models.statistics.</span></span><span class="sig-name descname"><span class="pre">ParticleType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/models/statistics.html#ParticleType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.statistics.ParticleType" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>Enumeration of two-particle statistics / symmetry types.</p>
+<p>Each member controls how <a class="reference internal" href="solvers_api.html#src.core.statistics.ThermalEngine" title="src.core.statistics.ThermalEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThermalEngine</span></code></a>
+symmetrises the two-particle spatial wavefunction.</p>
+<dl class="simple">
+<dt>Members:</dt><dd><dl class="simple">
+<dt>BOLTZMANN: Classical, distinguishable particles.  No exchange</dt><dd><p>symmetry is imposed.  The two-particle density is the direct
+(outer) product of two independent single-particle densities.
+This serves as the classical reference for comparing quantum
+bunching / antibunching effects.</p>
+</dd>
+<dt>BOSON: Identical bosons (integer total spin).  The spatial</dt><dd><p>wavefunction is fully <em>symmetric</em> under exchange:
+<span class="math notranslate nohighlight">\(\Psi_S \propto \phi_n(x_1)\phi_m(x_2)
++ \phi_n(x_2)\phi_m(x_1)\)</span>.
+Bosons tend to <em>bunch</em> (enhanced probability near the diagonal
+<span class="math notranslate nohighlight">\(x_1 = x_2\)</span>).</p>
+</dd>
+<dt>FERMION: Identical fermions in a spin-polarised state (or any</dt><dd><p>state with a definite antisymmetric spin part).  The spatial
+wavefunction is fully <em>antisymmetric</em> under exchange:
+<span class="math notranslate nohighlight">\(\Psi_A \propto \phi_n(x_1)\phi_m(x_2)
+- \phi_n(x_2)\phi_m(x_1)\)</span>.
+The Pauli Exclusion Principle is a direct consequence:
+<span class="math notranslate nohighlight">\(\Psi_A(x, x) = 0\)</span> exactly, so the diagonal of the
+two-particle density vanishes identically.</p>
+</dd>
+<dt>SPIN_HALF: Two spin-1/2 particles in a thermally mixed spin state</dt><dd><p>(equal population of all four spin substates).  Results in a
+spatial mixture of <span class="math notranslate nohighlight">\(1/4\, P_S + 3/4\, P_A\)</span>.</p>
+</dd>
+<dt>SPIN_ONE: Two spin-1 particles in a thermally mixed spin state</dt><dd><p>(equal population of all nine spin substates).  Results in a
+spatial mixture of <span class="math notranslate nohighlight">\(2/3\, P_S + 1/3\, P_A\)</span>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">src.models.statistics</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParticleType</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ParticleType</span><span class="o">.</span><span class="n">SPIN_HALF</span>
+<span class="go">&lt;ParticleType.SPIN_HALF: 4&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ParticleType</span><span class="o">.</span><span class="n">SPIN_HALF</span><span class="o">.</span><span class="n">name</span>
+<span class="go">&#39;SPIN_HALF&#39;</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.statistics.ParticleType.BOLTZMANN">
+<span class="sig-name descname"><span class="pre">BOLTZMANN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#src.models.statistics.ParticleType.BOLTZMANN" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.statistics.ParticleType.BOSON">
+<span class="sig-name descname"><span class="pre">BOSON</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#src.models.statistics.ParticleType.BOSON" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.statistics.ParticleType.FERMION">
+<span class="sig-name descname"><span class="pre">FERMION</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#src.models.statistics.ParticleType.FERMION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.statistics.ParticleType.SPIN_HALF">
+<span class="sig-name descname"><span class="pre">SPIN_HALF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></span><a class="headerlink" href="#src.models.statistics.ParticleType.SPIN_HALF" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.statistics.ParticleType.SPIN_ONE">
+<span class="sig-name descname"><span class="pre">SPIN_ONE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></span><a class="headerlink" href="#src.models.statistics.ParticleType.SPIN_ONE" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="config_api.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Configuration Layer</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="solvers_api.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Solvers &amp; Statistics Engine</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#potential-definitions">Potential Definitions</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.BasePotential"><code class="docutils literal notranslate"><span class="pre">BasePotential</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.BasePotential.__init__"><code class="docutils literal notranslate"><span class="pre">BasePotential.__init__()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.BasePotential.config"><code class="docutils literal notranslate"><span class="pre">BasePotential.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.BasePotential.evaluate"><code class="docutils literal notranslate"><span class="pre">BasePotential.evaluate()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.BasePotential.get_domain"><code class="docutils literal notranslate"><span class="pre">BasePotential.get_domain()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.InfiniteSquareWell"><code class="docutils literal notranslate"><span class="pre">InfiniteSquareWell</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.InfiniteSquareWell.evaluate"><code class="docutils literal notranslate"><span class="pre">InfiniteSquareWell.evaluate()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.InfiniteSquareWell.get_domain"><code class="docutils literal notranslate"><span class="pre">InfiniteSquareWell.get_domain()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.FiniteSquareWell"><code class="docutils literal notranslate"><span class="pre">FiniteSquareWell</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.FiniteSquareWell.__init__"><code class="docutils literal notranslate"><span class="pre">FiniteSquareWell.__init__()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.FiniteSquareWell.v0"><code class="docutils literal notranslate"><span class="pre">FiniteSquareWell.v0</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.FiniteSquareWell.width"><code class="docutils literal notranslate"><span class="pre">FiniteSquareWell.width</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.FiniteSquareWell.evaluate"><code class="docutils literal notranslate"><span class="pre">FiniteSquareWell.evaluate()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.FiniteSquareWell.get_domain"><code class="docutils literal notranslate"><span class="pre">FiniteSquareWell.get_domain()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.HarmonicPotential"><code class="docutils literal notranslate"><span class="pre">HarmonicPotential</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.HarmonicPotential.__init__"><code class="docutils literal notranslate"><span class="pre">HarmonicPotential.__init__()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.HarmonicPotential.omega"><code class="docutils literal notranslate"><span class="pre">HarmonicPotential.omega</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.HarmonicPotential.v0_limit"><code class="docutils literal notranslate"><span class="pre">HarmonicPotential.v0_limit</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.HarmonicPotential.center"><code class="docutils literal notranslate"><span class="pre">HarmonicPotential.center</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.HarmonicPotential.evaluate"><code class="docutils literal notranslate"><span class="pre">HarmonicPotential.evaluate()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.HarmonicPotential.get_domain"><code class="docutils literal notranslate"><span class="pre">HarmonicPotential.get_domain()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.VShapedPotential"><code class="docutils literal notranslate"><span class="pre">VShapedPotential</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.VShapedPotential.__init__"><code class="docutils literal notranslate"><span class="pre">VShapedPotential.__init__()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.VShapedPotential.slope"><code class="docutils literal notranslate"><span class="pre">VShapedPotential.slope</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.VShapedPotential.v0_limit"><code class="docutils literal notranslate"><span class="pre">VShapedPotential.v0_limit</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.VShapedPotential.center"><code class="docutils literal notranslate"><span class="pre">VShapedPotential.center</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.VShapedPotential.evaluate"><code class="docutils literal notranslate"><span class="pre">VShapedPotential.evaluate()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.potentials.VShapedPotential.get_domain"><code class="docutils literal notranslate"><span class="pre">VShapedPotential.get_domain()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quantum-state-container">Quantum State Container</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.states.QuantumSystem"><code class="docutils literal notranslate"><span class="pre">QuantumSystem</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.states.QuantumSystem.__init__"><code class="docutils literal notranslate"><span class="pre">QuantumSystem.__init__()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.states.QuantumSystem.energies"><code class="docutils literal notranslate"><span class="pre">QuantumSystem.energies</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.states.QuantumSystem.wavefunctions"><code class="docutils literal notranslate"><span class="pre">QuantumSystem.wavefunctions</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.states.QuantumSystem.x_grid"><code class="docutils literal notranslate"><span class="pre">QuantumSystem.x_grid</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.states.QuantumSystem.potential"><code class="docutils literal notranslate"><span class="pre">QuantumSystem.potential</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.states.QuantumSystem.n_states"><code class="docutils literal notranslate"><span class="pre">QuantumSystem.n_states</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.states.QuantumSystem.ground_state_energy"><code class="docutils literal notranslate"><span class="pre">QuantumSystem.ground_state_energy</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.states.QuantumSystem.get_probability_density"><code class="docutils literal notranslate"><span class="pre">QuantumSystem.get_probability_density()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.states.QuantumSystem.get_state"><code class="docutils literal notranslate"><span class="pre">QuantumSystem.get_state()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#particle-statistics-enumeration">Particle Statistics Enumeration</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.statistics.ParticleType"><code class="docutils literal notranslate"><span class="pre">ParticleType</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.statistics.ParticleType.BOLTZMANN"><code class="docutils literal notranslate"><span class="pre">ParticleType.BOLTZMANN</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.statistics.ParticleType.BOSON"><code class="docutils literal notranslate"><span class="pre">ParticleType.BOSON</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.statistics.ParticleType.FERMION"><code class="docutils literal notranslate"><span class="pre">ParticleType.FERMION</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.statistics.ParticleType.SPIN_HALF"><code class="docutils literal notranslate"><span class="pre">ParticleType.SPIN_HALF</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.models.statistics.ParticleType.SPIN_ONE"><code class="docutils literal notranslate"><span class="pre">ParticleType.SPIN_ONE</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/physics_api.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Pablo Sanchez, Juan Montoya.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

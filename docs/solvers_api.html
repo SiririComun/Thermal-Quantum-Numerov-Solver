@@ -1,0 +1,1022 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Solvers &amp; Statistics Engine &#8212; Thermal-Quantum-Numerov-Solver 1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'solvers_api';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Visualization" href="viz_api.html" />
+    <link rel="prev" title="Physics Models" href="physics_api.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">Numerov Solver</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="config_api.html">
+    Configuration Layer
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="physics_api.html">
+    Physics Models
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Solvers & Statistics Engine
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="viz_api.html">
+    Visualization
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SiririComun/Thermal-Quantum-Numerov-Solver" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="config_api.html">
+    Configuration Layer
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="physics_api.html">
+    Physics Models
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Solvers & Statistics Engine
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="viz_api.html">
+    Visualization
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SiririComun/Thermal-Quantum-Numerov-Solver" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Solvers &amp; Statistics Engine</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="solvers-statistics-engine">
+<h1>Solvers &amp; Statistics Engine<a class="headerlink" href="#solvers-statistics-engine" title="Link to this heading">#</a></h1>
+<p>This page documents the <strong>numerical core</strong> of the library: the eigenvalue
+solver and the thermal statistics engine.</p>
+<section id="matrix-numerov-solver">
+<h2>Matrix Numerov Solver<a class="headerlink" href="#matrix-numerov-solver" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">NumerovSolver</span></code> converts the 1D TISE into a generalised eigenvalue problem
+of order <span class="math notranslate nohighlight">\(O(dx^4)\)</span> using the <strong>Matrix Numerov</strong> method.</p>
+<p class="rubric">Algorithm Summary</p>
+<p>Starting from the three-point Numerov recurrence, the interior grid points
+are assembled into two symmetric tridiagonal matrices <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[A\,\boldsymbol{\psi} = \varepsilon\, B\,\boldsymbol{\psi}\]</div>
+<p>The system is solved by <code class="docutils literal notranslate"><span class="pre">scipy.linalg.eigh</span></code>, which exploits the
+real-symmetric positive-definite structure of <span class="math notranslate nohighlight">\(B\)</span> to return eigenvalues
+in ascending order without post-sorting.</p>
+<p class="rubric">Convergence</p>
+<p>Numerov’s method achieves <span class="math notranslate nohighlight">\(O(dx^4)\)</span> global accuracy.  With the default
+600-point grid, the infinite-well ground state recovers <span class="math notranslate nohighlight">\(E_0 = 1.0000\)</span>
+to six significant figures.</p>
+<p id="module-src.core.solvers">Matrix Numerov eigenvalue solver for the 1D Time-Independent Schrödinger Equation.</p>
+<p>This module provides the <a class="reference internal" href="#src.core.solvers.NumerovSolver" title="src.core.solvers.NumerovSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumerovSolver</span></code></a> service class, which refactors
+the procedural <code class="docutils literal notranslate"><span class="pre">solve_schrodinger_numerov</span></code> function from
+<code class="docutils literal notranslate"><span class="pre">legacy/research_prototype.ipynb</span></code> into a production-grade engine.</p>
+<section id="mathematical-background">
+<h3>Mathematical Background<a class="headerlink" href="#mathematical-background" title="Link to this heading">#</a></h3>
+<p>The TISE in dimensionless units is:</p>
+<div class="math notranslate nohighlight">
+\[-\frac{\hbar^2}{2m} \frac{d^2\psi}{dx^2} + V(x)\psi = E\psi\]</div>
+<p>which, after substituting the scaled variable <span class="math notranslate nohighlight">\(\varepsilon = 2mE/\hbar^2\)</span>
+and <span class="math notranslate nohighlight">\(U(x) = (2m/\hbar^2)V(x)\)</span>, becomes:</p>
+<div class="math notranslate nohighlight">
+\[\psi'' + (\varepsilon - U(x))\psi = 0\]</div>
+<p><strong>Why O(dx⁴)?  The Numerov Advantage</strong></p>
+<p>A standard central-difference second derivative has <span class="math notranslate nohighlight">\(O(dx^2)\)</span> local
+truncation error:</p>
+<div class="math notranslate nohighlight">
+\[\psi''_i = \frac{\psi_{i+1} - 2\psi_i + \psi_{i-1}}{dx^2} + O(dx^2)\]</div>
+<p>The Numerov method improves this by exploiting the structure of the
+differential equation itself.  Starting from the exact Taylor expansion:</p>
+<div class="math notranslate nohighlight">
+\[\psi_{i+1} + \psi_{i-1} = 2\psi_i + dx^2 \psi''_i + \frac{dx^4}{12}
+\psi''''_i + O(dx^6)\]</div>
+<p>and noting that for the TISE <span class="math notranslate nohighlight">\(\psi'''' = (U-\varepsilon)^2\psi + O(dx^2)\)</span>,
+the fourth-derivative term can be approximated to <span class="math notranslate nohighlight">\(O(dx^2)\)</span> by a second
+finite difference of <span class="math notranslate nohighlight">\((U-\varepsilon)\psi\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\frac{dx^4}{12}\psi''''_i \approx \frac{dx^2}{12}
+\left[f_{i+1}\psi_{i+1} - 2f_i\psi_i + f_{i-1}\psi_{i-1}\right]
++ O(dx^6)\]</div>
+<p>where <span class="math notranslate nohighlight">\(f_i = U_i - \varepsilon\)</span>.  Substituting into the Taylor expansion
+and rearranging gives the Numerov recurrence, which has a <strong>global truncation
+error of</strong> <span class="math notranslate nohighlight">\(O(dx^4)\)</span> — two orders better than standard FD.</p>
+<p><strong>Matrix Form (Generalized Eigenvalue Problem)</strong></p>
+<p>Applying the Numerov recurrence to all <span class="math notranslate nohighlight">\(N-2\)</span> interior grid points
+(with Dirichlet boundary conditions <span class="math notranslate nohighlight">\(\psi_0 = \psi_{N-1} = 0\)</span>) leads to:</p>
+<div class="math notranslate nohighlight">
+\[A\,\psi = \varepsilon\, B\,\psi\]</div>
+<p>where:</p>
+<div class="math notranslate nohighlight">
+\[A = \underbrace{\frac{-1}{dx^2} M_{-2}}_{\text{kinetic}} +
+    \underbrace{\frac{1}{12} M_{10}\, \mathrm{diag}(U)}_{\text{potential}}
+\qquad
+B = \frac{1}{12} M_{10}\]</div>
+<p><span class="math notranslate nohighlight">\(M_{-2}\)</span> is the tridiagonal matrix with <span class="math notranslate nohighlight">\(-2\)</span> on the main diagonal
+and <span class="math notranslate nohighlight">\(+1\)</span> on the first off-diagonals (the standard second-difference
+stencil).  <span class="math notranslate nohighlight">\(M_{10}\)</span> is the tridiagonal matrix with <span class="math notranslate nohighlight">\(10\)</span> on the
+main diagonal and <span class="math notranslate nohighlight">\(+1\)</span> on the first off-diagonals (the Numerov weight
+matrix).  Both are <em>symmetric</em>.</p>
+<p>After solving for <span class="math notranslate nohighlight">\(\varepsilon\)</span>, the physical energies are recovered as:</p>
+<div class="math notranslate nohighlight">
+\[E_n = \varepsilon_n \cdot \frac{\hbar^2}{2m} = \frac{\varepsilon_n}{f}
+\qquad f = \frac{2m}{\hbar^2}\]</div>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.core.solvers.BaseSolver">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">src.core.solvers.</span></span><span class="sig-name descname"><span class="pre">BaseSolver</span></span><a class="reference internal" href="_modules/src/core/solvers.html#BaseSolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.core.solvers.BaseSolver" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class defining the interface for all 1D TISE solvers.</p>
+<p>Any numerical method that solves the Time-Independent Schrödinger Equation
+— be it Matrix Numerov, Finite Element, or a Shooting Method — must
+implement this contract.  High-level “Experiment” code depends <em>only</em> on
+this interface, never on a concrete solver implementation.</p>
+<p>This enforces the <strong>Dependency Inversion Principle</strong>: abstractions own the
+policy; concrete solvers own the algorithm.  Swapping from Numerov to FEM
+requires only a new subclass, with zero changes to any consumer.</p>
+<p class="rubric">Example</p>
+<p>Define and use a custom solver transparently:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ShootingSolver</span><span class="p">(</span><span class="n">BaseSolver</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">potential</span><span class="p">:</span> <span class="n">BasePotential</span><span class="p">,</span>
+        <span class="n">n_states</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QuantumSystem</span><span class="p">:</span>
+        <span class="o">...</span>  <span class="c1"># shooting-method implementation</span>
+
+<span class="n">experiment</span><span class="p">:</span> <span class="n">BaseSolver</span> <span class="o">=</span> <span class="n">ShootingSolver</span><span class="p">()</span>
+<span class="n">system</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">InfiniteSquareWell</span><span class="p">())</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.core.solvers.BaseSolver.solve">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">potential</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="physics_api.html#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><span class="pre">BasePotential</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="physics_api.html#src.models.states.QuantumSystem" title="src.models.states.QuantumSystem"><span class="pre">QuantumSystem</span></a></span></span><a class="reference internal" href="_modules/src/core/solvers.html#BaseSolver.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.core.solvers.BaseSolver.solve" title="Link to this definition">#</a></dt>
+<dd><p>Solves the 1D TISE and returns the lowest <code class="docutils literal notranslate"><span class="pre">n_states</span></code> eigenpairs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>potential</strong> – Any concrete <a class="reference internal" href="physics_api.html#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePotential</span></code></a>
+subclass supplying <span class="math notranslate nohighlight">\(V(x)\)</span> and the spatial domain.</p></li>
+<li><p><strong>n_states</strong> – Number of lowest-energy eigenvalues and eigenvectors to
+compute.  Must be at least 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <a class="reference internal" href="physics_api.html#src.models.states.QuantumSystem" title="src.models.states.QuantumSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumSystem</span></code></a> containing the
+spatial grid, eigenvalues <span class="math notranslate nohighlight">\(E_n\)</span>, normalised eigenvectors
+<span class="math notranslate nohighlight">\(\psi_n(x)\)</span>, and a reference to the originating potential.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">n_states</span> <span class="pre">&lt;</span> <span class="pre">1</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.core.solvers.NumerovSolver">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">src.core.solvers.</span></span><span class="sig-name descname"><span class="pre">NumerovSolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_api.html#src.models.config.NumericalConfig" title="src.models.config.NumericalConfig"><span class="pre">NumericalConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/core/solvers.html#NumerovSolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.core.solvers.NumerovSolver" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.core.solvers.BaseSolver" title="src.core.solvers.BaseSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSolver</span></code></a></p>
+<p>Service class that solves the 1D TISE via the Matrix Numerov method.</p>
+<p>Encapsulates the full Numerov eigenvalue pipeline:</p>
+<ol class="arabic simple">
+<li><p>Auto-build the spatial grid from the potential’s own domain.</p></li>
+<li><p>Assemble the symmetric generalised-eigenvalue matrices A and B.</p></li>
+<li><p>Solve with <code class="docutils literal notranslate"><span class="pre">scipy.linalg.eigh</span></code> (optimised for real-symmetric
+positive-definite pencils).</p></li>
+<li><p>Recover physical energies and normalise wavefunctions.</p></li>
+</ol>
+<p>The solver is <strong>closed for modification</strong> and <strong>open for extension</strong> via
+any subclass of <a class="reference internal" href="physics_api.html#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePotential</span></code></a> — the
+potential geometry is injected through <a class="reference internal" href="#src.core.solvers.NumerovSolver.solve" title="src.core.solvers.NumerovSolver.solve"><code class="xref py py-meth docutils literal notranslate"><span class="pre">solve()</span></code></a>, never hardcoded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – Numerical discretisation parameters.  When <code class="docutils literal notranslate"><span class="pre">None</span></code>,
+defaults are used (600 grid points, convergence tolerance 1e-4).</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">src.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfiniteSquareWell</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span> <span class="o">=</span> <span class="n">NumerovSolver</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">energies</span><span class="p">,</span> <span class="n">wavefunctions</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">InfiniteSquareWell</span><span class="p">(),</span> <span class="n">n_states</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># energies ≈ [1, 4, 9, 16, 25] in dimensionless E₁ units</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.core.solvers.NumerovSolver.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_api.html#src.models.config.NumericalConfig" title="src.models.config.NumericalConfig"><span class="pre">NumericalConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/src/core/solvers.html#NumerovSolver.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.core.solvers.NumerovSolver.__init__" title="Link to this definition">#</a></dt>
+<dd><p>Stores the injected numerical configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – Discretisation constants.  When <code class="docutils literal notranslate"><span class="pre">None</span></code>, the standard
+600-point grid from <a class="reference internal" href="config_api.html#src.models.config.NumericalConfig" title="src.models.config.NumericalConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericalConfig</span></code></a>
+is used.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.core.solvers.NumerovSolver.config">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">config</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config_api.html#src.models.config.NumericalConfig" title="src.models.config.NumericalConfig"><span class="pre">NumericalConfig</span></a></span><a class="headerlink" href="#src.core.solvers.NumerovSolver.config" title="Link to this definition">#</a></dt>
+<dd><p>The injected numerical parameters, read-only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="config_api.html#src.models.config.NumericalConfig" title="src.models.config.NumericalConfig">NumericalConfig</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.core.solvers.NumerovSolver.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">potential</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="physics_api.html#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><span class="pre">BasePotential</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="physics_api.html#src.models.states.QuantumSystem" title="src.models.states.QuantumSystem"><span class="pre">QuantumSystem</span></a></span></span><a class="reference internal" href="_modules/src/core/solvers.html#NumerovSolver.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.core.solvers.NumerovSolver.solve" title="Link to this definition">#</a></dt>
+<dd><p>Solves the 1D TISE for the given potential and returns a QuantumSystem.</p>
+<p>The method follows these steps:</p>
+<ol class="arabic simple">
+<li><p><strong>Auto-Grid</strong>: Calls <code class="docutils literal notranslate"><span class="pre">potential.get_domain()</span></code> to obtain
+<span class="math notranslate nohighlight">\([x_{min}, x_{max}]\)</span> and builds a uniform grid of
+<code class="docutils literal notranslate"><span class="pre">config.n_points</span></code> points.  The domain is set by the
+<em>potential</em>, not by global constants.</p></li>
+<li><p><strong>Matrix assembly</strong>: Constructs the symmetric generalised
+matrices <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span> from the Numerov recurrence
+using only the <span class="math notranslate nohighlight">\(N-2\)</span> interior grid points (Dirichlet BCs).</p></li>
+<li><p><strong>Solve</strong>: Calls <code class="docutils literal notranslate"><span class="pre">scipy.linalg.eigh(A,</span> <span class="pre">B,</span> <span class="pre">subset_by_index=...)</span></code>,
+which is optimised for symmetric-positive-definite pencils and
+returns eigenvalues in ascending order without post-sorting.</p></li>
+<li><p><strong>Energy recovery</strong>: Converts dimensionless eigenvalues
+<span class="math notranslate nohighlight">\(\varepsilon_n\)</span> to physical energies
+<span class="math notranslate nohighlight">\(E_n = \varepsilon_n \hbar^2 / (2m)\)</span>.</p></li>
+<li><p><strong>Normalisation</strong>: Calls <code class="xref py py-meth docutils literal notranslate"><span class="pre">_normalize()</span></code> on each wavefunction
+so that <span class="math notranslate nohighlight">\(\int |\psi_n(x)|^2\, dx = 1\)</span>.</p></li>
+<li><p><strong>Wrapping</strong>: Bundles the spatial grid, energies, wavefunctions,
+and originating potential into a <a class="reference internal" href="physics_api.html#src.models.states.QuantumSystem" title="src.models.states.QuantumSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumSystem</span></code></a>
+domain model, enforcing shape consistency and eliminating data
+desynchronisation.</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>potential</strong> – Any concrete <a class="reference internal" href="physics_api.html#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePotential</span></code></a>
+subclass.  The solver reads <code class="docutils literal notranslate"><span class="pre">potential.config</span></code> for physical
+constants and <code class="docutils literal notranslate"><span class="pre">potential.get_domain()</span></code> for the grid domain.</p></li>
+<li><p><strong>n_states</strong> – Number of lowest eigenvalues/eigenvectors to compute.
+Requesting fewer states is significantly faster for large grids
+because <code class="docutils literal notranslate"><span class="pre">eigh</span></code> uses a divide-and-conquer LAPACK driver.
+Defaults to 20.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">energies</span></code> — 1D float64 array of shape <code class="docutils literal notranslate"><span class="pre">(n_states,)</span></code>
+containing <span class="math notranslate nohighlight">\(E_n\)</span> in dimensionless units of <span class="math notranslate nohighlight">\(E_1\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wavefunctions</span></code> — 2D float64 array of shape
+<code class="docutils literal notranslate"><span class="pre">(n_points,</span> <span class="pre">n_states)</span></code> where column <code class="docutils literal notranslate"><span class="pre">k</span></code> is
+<span class="math notranslate nohighlight">\(\psi_k(x)\)</span>, normalised so that
+<span class="math notranslate nohighlight">\(\int |\psi_k|^2\, dx = 1\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x_grid</span></code> — the uniform spatial coordinate array.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">potential</span></code> — the originating <a class="reference internal" href="physics_api.html#src.models.potentials.BasePotential" title="src.models.potentials.BasePotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePotential</span></code></a>.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <a class="reference internal" href="physics_api.html#src.models.states.QuantumSystem" title="src.models.states.QuantumSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumSystem</span></code></a> containing</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">n_states</span> <span class="pre">&lt;</span> <span class="pre">1</span></code> or if the grid has fewer than 3
+    points (making a 0-sized interior impossible).</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p><strong>Symmetrisation of</strong> <span class="math notranslate nohighlight">\(A\)</span>: The potential term
+<span class="math notranslate nohighlight">\((1/12) M_{10} \cdot \mathrm{diag}(U)\)</span> is not exactly
+symmetric for spatially varying <span class="math notranslate nohighlight">\(U(x)\)</span>, because its
+<span class="math notranslate nohighlight">\((i, j)\)</span> off-diagonal entry is <span class="math notranslate nohighlight">\(M_{10}[i,j] \cdot U_j\)</span>
+while its transpose has <span class="math notranslate nohighlight">\(M_{10}[i,j] \cdot U_i\)</span>.  The
+asymmetry at neighbouring nodes is <span class="math notranslate nohighlight">\(O(dx)\)</span>.  We symmetrise
+<span class="math notranslate nohighlight">\(A\)</span> explicitly via <span class="math notranslate nohighlight">\(A \leftarrow (A + A^T)/2\)</span> before
+passing it to <code class="docutils literal notranslate"><span class="pre">eigh</span></code>.  By first-order perturbation theory the
+anti-symmetric part has zero quadratic form on real eigenvectors
+(it is anti-Hermitian), so the eigenvalue error from this step is
+at most <span class="math notranslate nohighlight">\(O(dx^2)\)</span> — well within the <span class="math notranslate nohighlight">\(10^{-3}\)</span> tolerance
+required for all physics analyses in this project.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<hr class="docutils" />
+<section id="thermal-statistics-engine">
+<h2>Thermal Statistics Engine<a class="headerlink" href="#thermal-statistics-engine" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ThermalEngine</span></code> computes single-particle and two-particle thermal densities
+in the <strong>Canonical Ensemble</strong> (Boltzmann distribution).</p>
+<p class="rubric">Single-Particle Density</p>
+<div class="math notranslate nohighlight">
+\[\rho(x) = \frac{1}{Z} \sum_{n=0}^{N}
+          e^{-E_n / k_B T}\,|\psi_n(x)|^2,
+\qquad Z = \sum_{n=0}^{N} e^{-E_n / k_B T}\]</div>
+<p>The series is truncated when successive terms fall below
+<code class="docutils literal notranslate"><span class="pre">NumericalConfig.convergence_tolerance</span></code>.</p>
+<p class="rubric">Two-Particle Pair Density</p>
+<p>For identical particles, the <strong>Symmetry Postulate</strong> requires:</p>
+<div class="math notranslate nohighlight">
+\[\Psi^{\pm}_{nm}(x_1, x_2)
+= \frac{1}{\sqrt{2}}
+  \bigl[\psi_n(x_1)\psi_m(x_2)
+  \pm \psi_m(x_1)\psi_n(x_2)\bigr]\]</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">−</span></code> branch enforces <strong>Pauli exclusion</strong>: <span class="math notranslate nohighlight">\(\rho^{(2)}(x,x) \equiv 0\)</span>
+for all fermion configurations.</p>
+<p id="module-src.core.statistics">Thermal statistics engine for 1D quantum systems of identical particles.</p>
+<p>This module provides <a class="reference internal" href="#src.core.statistics.ThermalEngine" title="src.core.statistics.ThermalEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThermalEngine</span></code></a>, the service class responsible for
+all statistical-mechanics post-processing of a solved <code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumSystem</span></code>.
+It refactors and encapsulates two families of functions from
+<code class="docutils literal notranslate"><span class="pre">legacy/research_prototype.ipynb</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">calc_thermal_density</span></code> (single-particle Boltzmann-weighted density)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_pair_prob</span></code> + <code class="docutils literal notranslate"><span class="pre">calc_thermal_2p</span></code> (two-particle symmetrised density)</p></li>
+</ul>
+<section id="design-solid">
+<h3>Design (SOLID)<a class="headerlink" href="#design-solid" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>SRP</strong>: <code class="docutils literal notranslate"><span class="pre">ThermalEngine</span></code> does one thing — thermal averaging.  It never
+touches eigenvalue solvers or potential geometry.</p></li>
+<li><p><strong>OCP</strong>: New statistics (e.g. anyons) can be added by extending
+<a class="reference internal" href="physics_api.html#src.models.statistics.ParticleType" title="src.models.statistics.ParticleType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleType</span></code></a> and the <code class="docutils literal notranslate"><span class="pre">_spin_components</span></code>
+helper without modifying existing methods.</p></li>
+<li><p><strong>DIP</strong>: All physics input arrives through the <a class="reference internal" href="physics_api.html#src.models.states.QuantumSystem" title="src.models.states.QuantumSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumSystem</span></code></a>
+interface; no concrete solver class is imported.</p></li>
+</ul>
+</section>
+<section id="mathematical-summary">
+<h3>Mathematical Summary<a class="headerlink" href="#mathematical-summary" title="Link to this heading">#</a></h3>
+<p><strong>Single-particle thermal density</strong></p>
+<div class="math notranslate nohighlight">
+\[\rho_{\text{th}}(x) = \frac{1}{Z}
+\sum_{n=0}^{N-1} e^{-(E_n - E_0)/(k_B T)}\, |\psi_n(x)|^2,
+\qquad Z = \sum_{n=0}^{N-1} e^{-(E_n - E_0)/(k_B T)}\]</div>
+<p>States are accumulated one at a time; summation stops when the maximum
+pointwise change in <span class="math notranslate nohighlight">\(\rho(x)\)</span> falls below <code class="docutils literal notranslate"><span class="pre">tolerance</span></code>.</p>
+<p><strong>Two-particle symmetrised pair density</strong> (for <span class="math notranslate nohighlight">\(n \neq m\)</span>)</p>
+<div class="math notranslate nohighlight">
+\[\Psi_S(x_1, x_2) = \frac{1}{\sqrt{2}}
+\bigl[\phi_n(x_1)\phi_m(x_2) + \phi_n(x_2)\phi_m(x_1)\bigr]
+\quad (\text{bosons})\]</div>
+<div class="math notranslate nohighlight">
+\[\Psi_A(x_1, x_2) = \frac{1}{\sqrt{2}}
+\bigl[\phi_n(x_1)\phi_m(x_2) - \phi_n(x_2)\phi_m(x_1)\bigr]
+\quad (\text{fermions})\]</div>
+<p>The diagonal <span class="math notranslate nohighlight">\(\Psi_A(x, x) = 0\)</span> identically (Pauli Exclusion Principle).</p>
+<p><strong>Thermal two-particle pair density</strong></p>
+<div class="math notranslate nohighlight">
+\[\rho_{\text{pair}}(x_1, x_2) = \frac{1}{Z}
+\sum_{n,m} e^{-(E_n + E_m - 2E_0)/(k_B T)}\,
+\sum_c f_c\, |\Psi_{c,nm}(x_1, x_2)|^2\]</div>
+<p>where <span class="math notranslate nohighlight">\(c\)</span> indexes symmetry channels and <span class="math notranslate nohighlight">\(f_c\)</span> are the
+spin-degeneracy fractions from <a class="reference internal" href="physics_api.html#src.models.statistics.ParticleType" title="src.models.statistics.ParticleType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleType</span></code></a>.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.core.statistics.ThermalEngine">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">src.core.statistics.</span></span><span class="sig-name descname"><span class="pre">ThermalEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/core/statistics.html#ThermalEngine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.core.statistics.ThermalEngine" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Service class for thermal and multi-particle statistical calculations.</p>
+<p><a class="reference internal" href="#src.core.statistics.ThermalEngine" title="src.core.statistics.ThermalEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThermalEngine</span></code></a> is a stateless service: all state lives in the
+<a class="reference internal" href="physics_api.html#src.models.states.QuantumSystem" title="src.models.states.QuantumSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumSystem</span></code></a> objects passed to its methods.
+The engine is safe to instantiate once and reuse across multiple systems
+and temperatures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>log_level</strong> – Python logging level (e.g. <code class="docutils literal notranslate"><span class="pre">logging.DEBUG</span></code>) used for
+internal convergence progress messages.  Defaults to
+<code class="docutils literal notranslate"><span class="pre">logging.WARNING</span></code> (silent in normal use).</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">src.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumerovSolver</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">src.core.statistics</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThermalEngine</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">src.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfiniteSquareWell</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">src.models.statistics</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParticleType</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">system</span> <span class="o">=</span> <span class="n">NumerovSolver</span><span class="p">()</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">InfiniteSquareWell</span><span class="p">(),</span> <span class="n">n_states</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">engine</span> <span class="o">=</span> <span class="n">ThermalEngine</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rho</span>    <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">calculate_thermal_density</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rho_2p</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">calculate_pair_density</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="n">ParticleType</span><span class="o">.</span><span class="n">FERMION</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.core.statistics.ThermalEngine.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/src/core/statistics.html#ThermalEngine.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.core.statistics.ThermalEngine.__init__" title="Link to this definition">#</a></dt>
+<dd><p>Initialises the engine and configures the internal logger.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>log_level</strong> – Logging verbosity.  Set to <code class="docutils literal notranslate"><span class="pre">logging.DEBUG</span></code> to trace
+convergence iteration counts.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.core.statistics.ThermalEngine.calculate_thermal_density">
+<span class="sig-name descname"><span class="pre">calculate_thermal_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="physics_api.html#src.models.states.QuantumSystem" title="src.models.states.QuantumSystem"><span class="pre">QuantumSystem</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/core/statistics.html#ThermalEngine.calculate_thermal_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.core.statistics.ThermalEngine.calculate_thermal_density" title="Link to this definition">#</a></dt>
+<dd><p>Computes the single-particle thermal probability density <span class="math notranslate nohighlight">\(\rho_{\text{th}}(x)\)</span>.</p>
+<p>States are added one at a time in ascending energy order.  Summation
+halts as soon as the maximum pointwise change in <span class="math notranslate nohighlight">\(\rho(x)\)</span> after
+adding the latest state is smaller than <code class="docutils literal notranslate"><span class="pre">tolerance</span></code> — the convergence
+criterion from <code class="docutils literal notranslate"><span class="pre">legacy/research_prototype.ipynb</span></code>.</p>
+<p>The Boltzmann factor uses <span class="math notranslate nohighlight">\(E_0\)</span> as the energy reference to
+prevent floating-point underflow for large <span class="math notranslate nohighlight">\(E_n / (k_B T)\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[w_n = e^{-(E_n - E_0)/(k_B T)}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system</strong> – A solved <a class="reference internal" href="physics_api.html#src.models.states.QuantumSystem" title="src.models.states.QuantumSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumSystem</span></code></a>.</p></li>
+<li><p><strong>temperature</strong> – Absolute temperature <span class="math notranslate nohighlight">\(T\)</span> in dimensionless units
+(same scale as <code class="docutils literal notranslate"><span class="pre">system.potential.config.kb</span></code>).</p></li>
+<li><p><strong>tolerance</strong> – Maximum allowed pointwise change in <span class="math notranslate nohighlight">\(\rho(x)\)</span>
+between successive state additions.  Summation stops when
+this threshold is met.  Defaults to <code class="docutils literal notranslate"><span class="pre">1e-4</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1D float64 array of shape <code class="docutils literal notranslate"><span class="pre">(n_points,)</span></code> containing
+<span class="math notranslate nohighlight">\(\rho_{\text{th}}(x)\)</span>, normalised so that its trapezoid
+integral over <code class="docutils literal notranslate"><span class="pre">system.x_grid</span></code> is <span class="math notranslate nohighlight">\(\approx 1\)</span>.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">temperature</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code>.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>At very low temperatures, only the ground state contributes
+meaningfully.  At high temperatures, the sum may require all
+<code class="docutils literal notranslate"><span class="pre">system.n_states</span></code> states before convergence; in that case a
+<code class="docutils literal notranslate"><span class="pre">logging.DEBUG</span></code> message is emitted and all states are used.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rho</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">calculate_thermal_density</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="n">system</span><span class="o">.</span><span class="n">x_grid</span><span class="p">))</span>  <span class="c1"># ≈ 1.0</span>
+<span class="go">1.0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.core.statistics.ThermalEngine.get_pair_density">
+<span class="sig-name descname"><span class="pre">get_pair_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="physics_api.html#src.models.states.QuantumSystem" title="src.models.states.QuantumSystem"><span class="pre">QuantumSystem</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="physics_api.html#src.models.statistics.ParticleType" title="src.models.statistics.ParticleType"><span class="pre">ParticleType</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/core/statistics.html#ThermalEngine.get_pair_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.core.statistics.ThermalEngine.get_pair_density" title="Link to this definition">#</a></dt>
+<dd><p>Returns the two-particle spatial density <span class="math notranslate nohighlight">\(|\Psi(x_1, x_2)|^2\)</span> for a single eigenstate pair.</p>
+<p>This is the <em>zero-temperature</em> building block used by
+<a class="reference internal" href="#src.core.statistics.ThermalEngine.calculate_pair_density" title="src.core.statistics.ThermalEngine.calculate_pair_density"><code class="xref py py-meth docutils literal notranslate"><span class="pre">calculate_pair_density()</span></code></a>.  Calling this method directly is
+useful for visualising a specific quantum state pair or verifying
+the Pauli Exclusion Principle on the diagonal.</p>
+<p><strong>Symmetry Requirement (Quantum Mechanics):</strong>
+For <em>identical</em> particles, the total wavefunction must be (anti-)symmetric
+under particle exchange (<span class="math notranslate nohighlight">\(x_1 \leftrightarrow x_2\)</span>).  The spatial
+part alone determines the exchange character only when the spin state is
+fixed.  Here, the spatial symmetry is enforced per the <code class="docutils literal notranslate"><span class="pre">p_type</span></code>
+specification:</p>
+<ul class="simple">
+<li><p><strong>BOSON</strong> (<span class="math notranslate nohighlight">\(n_1 \neq n_2\)</span>):
+<span class="math notranslate nohighlight">\(\Psi_S = (\phi_{n_1}(x_1)\phi_{n_2}(x_2) + \phi_{n_1}(x_2)\phi_{n_2}(x_1)) / \sqrt{2}\)</span></p></li>
+<li><p><strong>FERMION</strong> (<span class="math notranslate nohighlight">\(n_1 \neq n_2\)</span>):
+<span class="math notranslate nohighlight">\(\Psi_A = (\phi_{n_1}(x_1)\phi_{n_2}(x_2) - \phi_{n_1}(x_2)\phi_{n_2}(x_1)) / \sqrt{2}\)</span></p></li>
+<li><p><strong>FERMION</strong> (<span class="math notranslate nohighlight">\(n_1 = n_2\)</span>):
+<span class="math notranslate nohighlight">\(\Psi_A \equiv 0\)</span> — Pauli Exclusion Principle.</p></li>
+<li><p><strong>BOSON</strong> (<span class="math notranslate nohighlight">\(n_1 = n_2\)</span>):
+<span class="math notranslate nohighlight">\(\Psi_S = \phi_{n_1}(x_1)\phi_{n_1}(x_2)\)</span> (already normalised).</p></li>
+</ul>
+<p>For <a class="reference internal" href="physics_api.html#src.models.statistics.ParticleType.SPIN_HALF" title="src.models.statistics.ParticleType.SPIN_HALF"><code class="xref py py-data docutils literal notranslate"><span class="pre">SPIN_HALF</span></code></a> and
+<a class="reference internal" href="physics_api.html#src.models.statistics.ParticleType.SPIN_ONE" title="src.models.statistics.ParticleType.SPIN_ONE"><code class="xref py py-data docutils literal notranslate"><span class="pre">SPIN_ONE</span></code></a>, the density is
+a weighted sum of the symmetric and antisymmetric components.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system</strong> – A solved <a class="reference internal" href="physics_api.html#src.models.states.QuantumSystem" title="src.models.states.QuantumSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumSystem</span></code></a>.</p></li>
+<li><p><strong>n1</strong> – Zero-based index of the first eigenstate (must be in
+<code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">system.n_states)</span></code>).</p></li>
+<li><p><strong>n2</strong> – Zero-based index of the second eigenstate (must be in
+<code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">system.n_states)</span></code>).</p></li>
+<li><p><strong>p_type</strong> – The <a class="reference internal" href="physics_api.html#src.models.statistics.ParticleType" title="src.models.statistics.ParticleType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleType</span></code></a> controlling
+the spatial symmetry of the pair wavefunction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>2D float64 array of shape <code class="docutils literal notranslate"><span class="pre">(n_points,</span> <span class="pre">n_points)</span></code> where entry
+<code class="docutils literal notranslate"><span class="pre">[i,</span> <span class="pre">j]</span></code> is <span class="math notranslate nohighlight">\(|\Psi(x_i, x_j)|^2\)</span>.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>IndexError</strong> – If <code class="docutils literal notranslate"><span class="pre">n1</span></code> or <code class="docutils literal notranslate"><span class="pre">n2</span></code> is outside <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">system.n_states)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.core.statistics.ThermalEngine.calculate_pair_density">
+<span class="sig-name descname"><span class="pre">calculate_pair_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="physics_api.html#src.models.states.QuantumSystem" title="src.models.states.QuantumSystem"><span class="pre">QuantumSystem</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="physics_api.html#src.models.statistics.ParticleType" title="src.models.statistics.ParticleType"><span class="pre">ParticleType</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/core/statistics.html#ThermalEngine.calculate_pair_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.core.statistics.ThermalEngine.calculate_pair_density" title="Link to this definition">#</a></dt>
+<dd><p>Computes the Boltzmann-weighted two-particle spatial density matrix.</p>
+<p>Sums over all pairs <span class="math notranslate nohighlight">\((n, m)\)</span> of eigenstates, weighted by the
+two-particle Boltzmann factor, and applies the symmetrisation required
+by <code class="docutils literal notranslate"><span class="pre">p_type</span></code>:</p>
+<div class="math notranslate nohighlight">
+\[\rho_{\text{pair}}(x_1, x_2) = \frac{1}{Z}
+\sum_{n=0}^{N-1} \sum_{m=0}^{N-1}
+e^{-(E_n + E_m - 2 E_0)/(k_B T)}
+\sum_c f_c\, |\Psi_{c,nm}(x_1, x_2)|^2\]</div>
+<p>The energy reference <span class="math notranslate nohighlight">\(2 E_0\)</span> (twice the single-particle ground
+state) is subtracted to prevent floating-point underflow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system</strong> – A solved <a class="reference internal" href="physics_api.html#src.models.states.QuantumSystem" title="src.models.states.QuantumSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumSystem</span></code></a>.</p></li>
+<li><p><strong>temperature</strong> – Absolute temperature <span class="math notranslate nohighlight">\(T\)</span> in dimensionless units.</p></li>
+<li><p><strong>p_type</strong> – The <a class="reference internal" href="physics_api.html#src.models.statistics.ParticleType" title="src.models.statistics.ParticleType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleType</span></code></a> controlling
+symmetry (and spin-mixture fractions) of the pair wavefunction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>2D float64 array of shape <code class="docutils literal notranslate"><span class="pre">(n_points,</span> <span class="pre">n_points)</span></code> where entry
+<code class="docutils literal notranslate"><span class="pre">[i,</span> <span class="pre">j]</span></code> is the thermal pair probability density at
+<span class="math notranslate nohighlight">\((x_i, x_j)\)</span>.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">temperature</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code>.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p><strong>Performance</strong>: The inner loop constructs one <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">N)</span></code> outer
+product per state pair using <code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.outer()</span></code> (BLAS level-2).
+For <code class="docutils literal notranslate"><span class="pre">n_states=20</span></code> and <code class="docutils literal notranslate"><span class="pre">N=600</span></code>, this is 400 outer products of
+size <span class="math notranslate nohighlight">\(600 \times 600 = 360{,}000\)</span> elements each — fully
+vectorised and cache-friendly.</p>
+<p><strong>Fermionic normalisation</strong>: For <code class="xref py py-data docutils literal notranslate"><span class="pre">ParticleType.FERMION</span></code>, pairs
+with <span class="math notranslate nohighlight">\(n_1 = n_2\)</span> contribute zero probability density (Pauli
+Exclusion) but their Boltzmann weight still enters <span class="math notranslate nohighlight">\(Z\)</span>.  This
+mirrors the legacy implementation and preserves relative comparison
+between boson and fermion distributions.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rho_2p</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">calculate_pair_density</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="n">ParticleType</span><span class="o">.</span><span class="n">BOSON</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rho_2p</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(600, 600)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="physics_api.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Physics Models</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="viz_api.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Visualization</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matrix-numerov-solver">Matrix Numerov Solver</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mathematical-background">Mathematical Background</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.core.solvers.BaseSolver"><code class="docutils literal notranslate"><span class="pre">BaseSolver</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.core.solvers.BaseSolver.solve"><code class="docutils literal notranslate"><span class="pre">BaseSolver.solve()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.core.solvers.NumerovSolver"><code class="docutils literal notranslate"><span class="pre">NumerovSolver</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.core.solvers.NumerovSolver.__init__"><code class="docutils literal notranslate"><span class="pre">NumerovSolver.__init__()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.core.solvers.NumerovSolver.config"><code class="docutils literal notranslate"><span class="pre">NumerovSolver.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.core.solvers.NumerovSolver.solve"><code class="docutils literal notranslate"><span class="pre">NumerovSolver.solve()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#thermal-statistics-engine">Thermal Statistics Engine</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#design-solid">Design (SOLID)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mathematical-summary">Mathematical Summary</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.core.statistics.ThermalEngine"><code class="docutils literal notranslate"><span class="pre">ThermalEngine</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.core.statistics.ThermalEngine.__init__"><code class="docutils literal notranslate"><span class="pre">ThermalEngine.__init__()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.core.statistics.ThermalEngine.calculate_thermal_density"><code class="docutils literal notranslate"><span class="pre">ThermalEngine.calculate_thermal_density()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.core.statistics.ThermalEngine.get_pair_density"><code class="docutils literal notranslate"><span class="pre">ThermalEngine.get_pair_density()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#src.core.statistics.ThermalEngine.calculate_pair_density"><code class="docutils literal notranslate"><span class="pre">ThermalEngine.calculate_pair_density()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/solvers_api.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Pablo Sanchez, Juan Montoya.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -44,7 +44,25 @@ extensions = [
     'sphinx_math_dollar',
     'sphinx.ext.viewcode',    # Adds "[source]" links
     'sphinx.ext.githubpages', # Helper for GitHub hosting
+    'sphinx_design',          # Grid cards, tabs, badges (pydata companion)
 ]
+
+# ---------------------------------------------------------------------------
+# Autodoc defaults
+# ---------------------------------------------------------------------------
+
+# Keep member order as declared in source; show __init__ content in class doc.
+autodoc_default_options = {
+    "member-order": "bysource",
+    "special-members": "__init__",
+    "undoc-members": True,
+    "show-inheritance": True,
+}
+
+# Suppress duplicate-member index warnings raised by slots=True frozen
+# dataclasses (Python 3.10+): autodoc processes slot descriptors *and*
+# instance variables separately, creating two entries for the same name.
+suppress_warnings = ["py.duplicate_object"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -134,7 +152,6 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -248,7 +265,6 @@ html_static_path = ['_static']
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Thermal-Quantum-Numerov-Solverdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -357,4 +373,32 @@ mathjax3_config = {
         'inlineMath': [['$', '$'], ['\\(', '\\)']],
         'processEscapes': True,
     },
+}
+
+# ---------------------------------------------------------------------------
+# Theme — PyData Sphinx Theme  (NumPy / Scikit-Learn aesthetic)
+# ---------------------------------------------------------------------------
+
+html_theme = "pydata_sphinx_theme"
+
+html_theme_options = {
+    # ── Branding ────────────────────────────────────────────────────────────
+    "logo": {
+        "text": "Numerov Solver",
+    },
+
+    # ── External links in the top-right icon cluster ─────────────────────────
+    "github_url": "https://github.com/SiririComun/Thermal-Quantum-Numerov-Solver",
+
+    # ── Navbar right-hand side ───────────────────────────────────────────────
+    "navbar_end": ["theme-switcher", "navbar-icon-links"],
+
+    # ── Secondary (right) sidebar items per page ─────────────────────────────
+    "secondary_sidebar_items": ["page-toc", "edit-this-page", "sourcelink"],
+
+    # ── Footer ───────────────────────────────────────────────────────────────
+    "footer_start": ["copyright"],
+
+    # ── Prev / Next navigation at bottom of every page ───────────────────────
+    "show_prev_next": True,
 }
