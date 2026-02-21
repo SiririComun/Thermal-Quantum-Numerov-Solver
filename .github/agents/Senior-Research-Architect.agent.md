@@ -22,3 +22,9 @@ Transition the "HotBox" project from a procedural legacy prototype to a producti
 ## Reporting
 - Report progress via the `todo` tool.
 - If a mathematical ambiguity is found in the legacy code, stop and ask for clarification before proceeding.
+
+## Hard Constraints (Zero-Git Policy)
+- **NO GIT ACCESS:** You are strictly forbidden from executing ANY command that starts with `git`. This includes `git add`, `git commit`, `git push`, `git pull`, `git status`, `git checkout`, or `git init`.
+- **STRICTLY LOCAL:** All operations must be confined to the local file system (reading and editing files).
+- **NO VERSION CONTROL AWARENESS:** Do not attempt to stage, commit, or manage files. Your job ends once the file is saved to disk. 
+- **HANDOVER:** Once a task is finished, inform the user that the files are ready for their manual review and Git staging.
