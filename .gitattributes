@@ -1,0 +1,11 @@
+# Mark the compiled documentation as generated/documentation
+docs/* linguist-documentation
+docs_site/* linguist-documentation
+
+# Mark legacy and research output as vendor/generated 
+# so they don't count against your main language stats
+legacy/* linguist-vendored
+research_output/* linguist-vendored
+
+# If you want to hide Jupyter Notebooks from the bar
+*.ipynb linguist-detectable=false
