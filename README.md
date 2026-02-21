@@ -35,6 +35,33 @@ The primary goal of this repository is to demonstrate the transition from **Scie
 - **Immutability:** Implementing **Frozen Dataclasses** for physical and numerical configurations to ensure scientific reproducibility.
 - **Documentation as Code (DaC):** Using **Sphinx with Napoleon** to generate a professional API website that renders LaTeX equations via MathJax.
 
+### 🗺️ Refactoring Roadmap
+
+| Phase | Deliverable | Status |
+|---|---|:---:|
+| 1 | `PhysicsConfig` & `NumericalConfig` frozen dataclasses | ✅ Complete |
+| 2 | `BasePotential` ABC + 4 concrete potentials | ✅ Complete |
+| 3 | `NumerovSolver` — Matrix Numerov, O(dx⁴) validated | ✅ Complete |
+| 3.5 | `BaseSolver` ABC — Dependency Inversion layer | ✅ Complete |
+| 4 | `QuantumSystem` domain model — immutable result container | ✅ Complete |
+| 5 | `ParticleType` enum + `ThermalEngine` — Pauli exclusion verified | ✅ Complete |
+| 6 | `QuantumPlotter` — 4 publication-quality plot methods | ✅ Complete |
+| 6.5 | Quality pass: ylim fix, visual validation suite | ✅ Complete |
+| 7 | `run_simulation.py` master pipeline + Sphinx docs (0 warnings) | ✅ Complete |
+| 8 | Showcase Jupyter Notebook | 🔜 Next |
+
+### 🔬 Research Showcase
+
+All library results are cross-validated against the original `legacy/research_prototype.ipynb` notebook to ensure numerical equivalence. The `run_simulation.py` entry point reproduces the complete pipeline — from eigenvalue decomposition to thermal pair densities — and saves publication-ready figures to `research_output/figures/`.
+
+| Validation check | Result |
+|---|:---:|
+| Infinite-well spectrum: $E_n = n^2$ (dimensionless units) | ✅ Verified |
+| Thermal density normalization: $\int \rho(x)\,dx = 1$ | ✅ Verified |
+| Pauli exclusion: diagonal of Fermion pair density $= 0$ | ✅ Verified |
+| Matrix Numerov convergence order $O(dx^4)$ | ✅ Verified |
+| Mass scaling $E_0 \propto \hbar^2 / (2mL^2)$ (finite-barrier regime) | ✅ Verified |
+
 ### 🤖 AI-Assisted Architecture
 This project utilizes a custom **Senior Research Architect** agent (configured in `.github/agents/`). This agent is designed to enforce **SOLID principles**, strict **Type Hinting**, and **Google-style documentation**, ensuring the transition from research to production maintains the highest engineering standards.
 
@@ -43,19 +70,23 @@ This project utilizes a custom **Senior Research Architect** agent (configured i
 ## 📂 Repository Structure
 
 ```text
-├── legacy/              # Original procedural research notebook (The Baseline)
-├── research_output/     # Academic Paper (LaTeX), original PDFs, and presentations
-├── docs/                # [Deployed] Compiled HTML documentation website
-├── docs_site/           # Source files for the Sphinx documentation engine
-├── src/                 # Modular OOP Library
-│   ├── core/            # Physics Engine (BaseSolver, Numerov Engine)
-│   ├── models/          # Data Models (Potentials, Configs, States)
-│   └── visualization/   # Professional plotting and 3D rendering utilities
-├── .github/agents/      # Custom AI Architect Agent configurations
-├── .gitignore           # Multi-language (Python/LaTeX) hygiene rules
-├── README.md            # Project documentation (English)
-├── README.es.md         # Project documentation (Spanish)
-└── requirements.txt     # Reproducibility manifest
+├── legacy/                  # Original procedural research notebook (The Baseline)
+├── research_output/         # Academic Paper (LaTeX), original PDFs, and presentations
+│   └── figures/             # ✨ Pipeline-generated publication figures
+├── docs/                    # [Deployed] Compiled HTML documentation website
+├── docs_site/               # Source files for the Sphinx documentation engine
+├── src/                     # Modular OOP Library
+│   ├── core/                # Physics Engine (BaseSolver, Numerov, ThermalEngine)
+│   ├── models/              # Data Models (Potentials, Configs, States, Statistics)
+│   └── visualization/       # Professional plotting and 3D rendering utilities
+├── test/
+│   └── visual_validation/   # Headless plot validation outputs
+├── run_simulation.py        # ✨ Master pipeline entry point
+├── .github/agents/          # Custom AI Architect Agent configurations
+├── .gitignore               # Multi-language (Python/LaTeX) hygiene rules
+├── README.md                # Project documentation (English)
+├── README.es.md             # Project documentation (Spanish)
+└── requirements.txt         # Reproducibility manifest
 ```
 
 ---
@@ -79,6 +110,11 @@ This project utilizes a custom **Senior Research Architect** agent (configured i
    ```bash
    sphinx-build -b html docs_site/source docs
    ```
+3. Run the master simulation pipeline:
+   ```bash
+   python run_simulation.py
+   ```
+   Figures are saved to `research_output/figures/`.
 
 ---
 

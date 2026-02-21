@@ -35,6 +35,33 @@ El objetivo principal de este repositorio es demostrar la transición de un **Pr
 - **Inmutabilidad:** Uso de **Dataclasses inmutables (frozen)** para las configuraciones físicas y numéricas, garantizando la reproducibilidad de los resultados.
 - **Documentación como Código (DaC):** Implementación de **Sphinx con Napoleon** para generar un sitio web profesional de la API que renderiza ecuaciones complejas mediante MathJax.
 
+### 🗺️ Hoja de Ruta del Proyecto
+
+| Fase | Entregable | Estado |
+|---|---|:---:|
+| 1 | Dataclasses inmutables `PhysicsConfig` y `NumericalConfig` | ✅ Completo |
+| 2 | ABC `BasePotential` + 4 potenciales concretos | ✅ Completo |
+| 3 | `NumerovSolver` — Numerov Matricial, precisión O(dx⁴) validada | ✅ Completo |
+| 3.5 | ABC `BaseSolver` — capa de Inversión de Dependencias | ✅ Completo |
+| 4 | Modelo de dominio `QuantumSystem` — contenedor de resultados inmutable | ✅ Completo |
+| 5 | Enum `ParticleType` + `ThermalEngine` — exclusión de Pauli verificada | ✅ Completo |
+| 6 | `QuantumPlotter` — 4 métodos de gráficas de calidad para publicación | ✅ Completo |
+| 6.5 | Pase de calidad: corrección de ylim, suite de validación visual | ✅ Completo |
+| 7 | Pipeline maestro `run_simulation.py` + documentación Sphinx (0 advertencias) | ✅ Completo |
+| 8 | Cuaderno Jupyter de muestra | 🔜 Próximo |
+
+### 🔬 Vitrina de Investigación
+
+Todos los resultados de la librería son validados en comparación con el cuaderno original `legacy/research_prototype.ipynb` para garantizar equivalencia numérica. El punto de entrada `run_simulation.py` reproduce el pipeline completo — desde la descomposición en valores propios hasta las densidades de pares térmicos — y guarda figuras listas para publicación en `research_output/figures/`.
+
+| Verificación de validación | Resultado |
+|---|:---:|
+| Espectro del pozo infinito: $E_n = n^2$ (unidades adimensionales) | ✅ Verificado |
+| Normalización de la densidad térmica: $\int \rho(x)\,dx = 1$ | ✅ Verificado |
+| Exclusión de Pauli: diagonal de la densidad de pares fermiónica $= 0$ | ✅ Verificado |
+| Orden de convergencia del Numerov Matricial $O(dx^4)$ | ✅ Verificado |
+| Escalado de masa $E_0 \propto \hbar^2 / (2mL^2)$ (régimen de barrera finita) | ✅ Verificado |
+
 ### 🤖 Arquitectura Asistida por IA
 Este proyecto emplea un agente personalizado de **Arquitecto de Investigación Senior** (configurado en `.github/agents/`). Este agente supervisa el cumplimiento de los **principios SOLID**, el uso estricto de **Type Hinting** (tipado estático) y la **documentación bajo el estándar de Google**, asegurando que el código mantenga estándares de ingeniería de software de alto nivel.
 
@@ -43,19 +70,23 @@ Este proyecto emplea un agente personalizado de **Arquitecto de Investigación S
 ## 📂 Estructura del Repositorio
 
 ```text
-├── legacy/              # Código original del proyecto (Línea base)
-├── research_output/     # Artículo académico (LaTeX), PDFs originales y presentaciones
-├── docs/                # [Publicado] Sitio web de documentación (HTML compilado)
-├── docs_site/           # Archivos fuente del motor de documentación Sphinx
-├── src/                 # Librería modular en POO
-│   ├── core/            # Motor de cálculo (BaseSolver, Motor de Numerov)
-│   ├── models/          # Modelos de datos (Potenciales, Configs, Estados)
-│   └── visualization/   # Utilidades de graficación y renderizado 3D
-├── .github/agents/      # Configuraciones del Agente Arquitecto (IA)
-├── .gitignore           # Reglas de limpieza para Python y LaTeX
-├── README.md            # Documentación principal (Inglés)
-├── README.es.md         # Documentación principal (Español)
-└── requirements.txt     # Manifiesto de dependencias para reproducibilidad
+├── legacy/                  # Código original del proyecto (Línea base)
+├── research_output/         # Artículo académico (LaTeX), PDFs originales y presentaciones
+│   └── figures/             # ✨ Figuras de publicación generadas por el pipeline
+├── docs/                    # [Publicado] Sitio web de documentación (HTML compilado)
+├── docs_site/               # Archivos fuente del motor de documentación Sphinx
+├── src/                     # Librería modular en POO
+│   ├── core/                # Motor de cálculo (BaseSolver, Motor de Numerov, ThermalEngine)
+│   ├── models/              # Modelos de datos (Potenciales, Configs, Estados, Estadística)
+│   └── visualization/       # Utilidades de graficación y renderizado 3D
+├── test/
+│   └── visual_validation/   # Salidas de validación visual sin cabecera
+├── run_simulation.py        # ✨ Punto de entrada del pipeline maestro
+├── .github/agents/          # Configuraciones del Agente Arquitecto (IA)
+├── .gitignore               # Reglas de limpieza para Python y LaTeX
+├── README.md                # Documentación principal (Inglés)
+├── README.es.md             # Documentación principal (Español)
+└── requirements.txt         # Manifiesto de dependencias para reproducibilidad
 ```
 
 ---
@@ -79,6 +110,11 @@ Este proyecto emplea un agente personalizado de **Arquitecto de Investigación S
    ```bash
    sphinx-build -b html docs_site/source docs
    ```
+3. Ejecuta el pipeline maestro de simulación:
+   ```bash
+   python run_simulation.py
+   ```
+   Las figuras se guardan en `research_output/figures/`.
 
 ---
 
