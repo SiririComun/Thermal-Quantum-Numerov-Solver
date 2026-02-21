@@ -156,11 +156,12 @@ class NumerovSolver(BaseSolver):
     """Service class that solves the 1D TISE via the Matrix Numerov method.
 
     Encapsulates the full Numerov eigenvalue pipeline:
-    (1) auto-build the spatial grid from the potential's own domain,
-    (2) assemble the symmetric generalised-eigenvalue matrices A and B,
-    (3) solve with ``scipy.linalg.eigh`` (optimised for real-symmetric
-        positive-definite pencils),
-    (4) recover physical energies and normalise wavefunctions.
+
+    1. Auto-build the spatial grid from the potential's own domain.
+    2. Assemble the symmetric generalised-eigenvalue matrices A and B.
+    3. Solve with ``scipy.linalg.eigh`` (optimised for real-symmetric
+       positive-definite pencils).
+    4. Recover physical energies and normalise wavefunctions.
 
     The solver is **closed for modification** and **open for extension** via
     any subclass of :class:`~src.models.potentials.BasePotential` — the
@@ -170,12 +171,7 @@ class NumerovSolver(BaseSolver):
         config: Numerical discretisation parameters.  When ``None``,
             defaults are used (600 grid points, convergence tolerance 1e-4).
 
-    Attributes:
-        config: The injected :class:`~src.models.config.NumericalConfig`,
-            read-only after construction.
-
-    Example::
-
+    Example:
         >>> from src.models import InfiniteSquareWell
         >>> solver = NumerovSolver()
         >>> energies, wavefunctions = solver.solve(InfiniteSquareWell(), n_states=5)

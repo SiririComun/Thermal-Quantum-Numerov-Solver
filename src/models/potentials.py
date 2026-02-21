@@ -45,9 +45,6 @@ class BasePotential(ABC):
             simulation.  Defaults to the standard reduced-unit set
             (``hbar=1``, ``mass=0.5``, ``L=pi``) that makes the infinite-well
             spectrum satisfy :math:`E_n = n^2`.
-
-    Attributes:
-        config: Read-only reference to the injected :class:`PhysicsConfig`.
     """
 
     def __init__(self, config: PhysicsConfig | None = None) -> None:

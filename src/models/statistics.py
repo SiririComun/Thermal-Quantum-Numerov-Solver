@@ -16,15 +16,34 @@ impose different symmetry requirements on the spatial wavefunction.
 The five members of :class:`ParticleType` cover the four cases implemented in
 ``legacy/research_prototype.ipynb`` plus a classical reference:
 
-============  =======  ==================================  ======================================
-Member        Spin     Spatial symmetry                  Physical origin
-============  =======  ==================================  ======================================
-BOLTZMANN     —        None (distinguishable)            Classical / Maxwell–Boltzmann
-BOSON         integer  Symmetric (:math:`+`)             Integer total spin (e.g. :sup:`4`\He)
-FERMION       half-int Antisymmetric (:math:`-`)         Half-integer spin, spin-polarised
-SPIN_HALF     1/2      1/4 :math:`P_S` + 3/4 :math:`P_A` 2-electron mixed-spin state
-SPIN_ONE      1        2/3 :math:`P_S` + 1/3 :math:`P_A` 2-boson mixed-spin (spin-1)
-============  =======  ==================================  ======================================
+.. list-table::
+   :header-rows: 1
+   :widths: 14 10 30 46
+
+   * - Member
+     - Spin
+     - Spatial symmetry
+     - Physical origin
+   * - BOLTZMANN
+     - —
+     - None (distinguishable)
+     - Classical / Maxwell–Boltzmann
+   * - BOSON
+     - integer
+     - Symmetric (:math:`+`)
+     - Integer total spin (e.g. :sup:`4` He)
+   * - FERMION
+     - half-int
+     - Antisymmetric (:math:`-`)
+     - Half-integer spin, spin-polarised
+   * - SPIN_HALF
+     - 1/2
+     - :math:`\tfrac{1}{4} P_S + \tfrac{3}{4} P_A`
+     - 2-electron mixed-spin state (singlet + triplet)
+   * - SPIN_ONE
+     - 1
+     - :math:`\tfrac{2}{3} P_S + \tfrac{1}{3} P_A`
+     - 2-boson mixed-spin (spin-1); S=2,0 symmetric, S=1 antisym
 
 **SPIN_HALF derivation** (spin-1/2 fermions, fully mixed spin state):
 The two-particle spin Hilbert space has dimension 4.  The singlet state
