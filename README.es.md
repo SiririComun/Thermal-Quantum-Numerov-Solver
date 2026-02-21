@@ -48,7 +48,8 @@ El objetivo principal de este repositorio es demostrar la transición de un **Pr
 | 6 | `QuantumPlotter` — 4 métodos de gráficas de calidad para publicación | ✅ Completo |
 | 6.5 | Pase de calidad: corrección de ylim, suite de validación visual | ✅ Completo |
 | 7 | Pipeline maestro `run_simulation.py` + documentación Sphinx (0 advertencias) | ✅ Completo |
-| 8 | Cuaderno Jupyter de muestra | 🔜 Próximo |
+| 8 | `Showcase.ipynb` — cuaderno ejecutado con salidas incrustadas | ✅ Completo |
+| 9 | Pulido Final y Empaquetado — README actualizado, build de documentación | ✅ Completo |
 
 ### 🔬 Vitrina de Investigación
 
@@ -61,6 +62,22 @@ Todos los resultados de la librería son validados en comparación con el cuader
 | Exclusión de Pauli: diagonal de la densidad de pares fermiónica $= 0$ | ✅ Verificado |
 | Orden de convergencia del Numerov Matricial $O(dx^4)$ | ✅ Verificado |
 | Escalado de masa $E_0 \propto \hbar^2 / (2mL^2)$ (régimen de barrera finita) | ✅ Verificado |
+
+### 📓 Cuaderno de Demostración
+
+[`Showcase.ipynb`](Showcase.ipynb) (en la raíz del proyecto) es un Jupyter Notebook completamente ejecutado que demuestra el pipeline completo de la librería en **seis secciones autocontenidas**, con todas las figuras incrustadas como salida:
+
+| Sección | Demuestra |
+|:--------|:----------|
+| §0 — Configuración del Entorno | Una sola celda de importación reemplaza ~20 líneas de constantes globales |
+| §1 — Simulación en Tres Líneas | `NumerovSolver().solve(FiniteSquareWell(v0=50))` + diagrama de niveles de energía |
+| §2 — Estadística Multi-Partícula | Mapa de calor de densidad de pares fermiónicos — exclusión de Pauli $\rho(x,x)=0$ |
+| §3 — Agujero de Intercambio (3D) | Renderizado de superficie con `plot_pair_density_3d` |
+| §4 — Barrido de Masa | Barrido paramétrico con `dataclasses.replace()` — 3 configuraciones, cero mutación |
+| §5 — Métricas de Boilerplate | Gráfico de barras que evidencia **≈ 98 % de reducción de código** vs. el prototipo legado |
+
+> **Hallazgo clave:** el `research_prototype.ipynb` legado requería ~240 líneas de código
+> repetitivo para reproducir lo que esta librería expresa en ~5 llamadas a métodos.
 
 ### 🤖 Arquitectura Asistida por IA
 Este proyecto emplea un agente personalizado de **Arquitecto de Investigación Senior** (configurado en `.github/agents/`). Este agente supervisa el cumplimiento de los **principios SOLID**, el uso estricto de **Type Hinting** (tipado estático) y la **documentación bajo el estándar de Google**, asegurando que el código mantenga estándares de ingeniería de software de alto nivel.
@@ -81,6 +98,7 @@ Este proyecto emplea un agente personalizado de **Arquitecto de Investigación S
 │   └── visualization/       # Utilidades de graficación y renderizado 3D
 ├── test/
 │   └── visual_validation/   # Salidas de validación visual sin cabecera
+├── Showcase.ipynb           # ✨ Cuaderno de demostración completamente ejecutado
 ├── run_simulation.py        # ✨ Punto de entrada del pipeline maestro
 ├── .github/agents/          # Configuraciones del Agente Arquitecto (IA)
 ├── .gitignore               # Reglas de limpieza para Python y LaTeX
@@ -91,7 +109,23 @@ Este proyecto emplea un agente personalizado de **Arquitecto de Investigación S
 
 ---
 
-## 🚀 Guía de Inicio
+## � Documentación en Línea
+
+La referencia completa de la API está publicada en **GitHub Pages**, generada desde docstrings estilo Google con Sphinx 9 y el tema PyData Sphinx:
+
+> 🔗 **[https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/](https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/)**
+
+| Página | Descripción |
+|:-------|:------------|
+| [Inicio](https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/) | Resumen del proyecto y guía rápida |
+| [Config API](https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/config_api.html) | Dataclasses inmutables `PhysicsConfig` y `NumericalConfig` |
+| [Physics API](https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/physics_api.html) | `BasePotential`, potenciales concretos, `ThermalEngine`, `ParticleType` |
+| [Solvers API](https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/solvers_api.html) | `BaseSolver`, `NumerovSolver`, `QuantumSystem` |
+| [Visualization API](https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/viz_api.html) | `QuantumPlotter` — los 4 métodos de graficación |
+
+---
+
+## �🚀 Guía de Inicio
 
 ### Requisitos previos
 - Python 3.10+

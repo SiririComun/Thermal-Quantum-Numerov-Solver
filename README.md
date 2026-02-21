@@ -48,7 +48,8 @@ The primary goal of this repository is to demonstrate the transition from **Scie
 | 6 | `QuantumPlotter` — 4 publication-quality plot methods | ✅ Complete |
 | 6.5 | Quality pass: ylim fix, visual validation suite | ✅ Complete |
 | 7 | `run_simulation.py` master pipeline + Sphinx docs (0 warnings) | ✅ Complete |
-| 8 | Showcase Jupyter Notebook | 🔜 Next |
+| 8 | `Showcase.ipynb` — fully-executed notebook with embedded outputs | ✅ Complete |
+| 9 | Final Polish & Packaging — README updates, clean production docs build | ✅ Complete |
 
 ### 🔬 Research Showcase
 
@@ -61,6 +62,22 @@ All library results are cross-validated against the original `legacy/research_pr
 | Pauli exclusion: diagonal of Fermion pair density $= 0$ | ✅ Verified |
 | Matrix Numerov convergence order $O(dx^4)$ | ✅ Verified |
 | Mass scaling $E_0 \propto \hbar^2 / (2mL^2)$ (finite-barrier regime) | ✅ Verified |
+
+### 📓 Showcase Notebook
+
+[`Showcase.ipynb`](Showcase.ipynb) (project root) is a fully-executed Jupyter Notebook demonstrating the complete library pipeline in **six self-contained sections**, with all figures embedded as output:
+
+| Section | Demonstrates |
+|:--------|:-------------|
+| §0 — Environment Setup | One import cell replacing ~20 lines of global constants |
+| §1 — Three-Line Simulation | `NumerovSolver().solve(FiniteSquareWell(v0=50))` + wavefunction energy-level diagram |
+| §2 — Multi-Particle Statistics | Fermion pair density heatmap — Pauli exclusion diagonal $\rho(x,x)=0$ visible |
+| §3 — Exchange Hole (3D) | `plot_pair_density_3d` surface rendering of the exchange hole |
+| §4 — Mass Sweep | Parametric sweep via `dataclasses.replace()` — 3 configs, zero mutation |
+| §5 — Boilerplate Metrics | Bar chart proving **≈ 98 % boilerplate reduction** vs. the legacy prototype |
+
+> **Key finding:** the legacy `research_prototype.ipynb` required ~240 lines of boilerplate
+> to reproduce what this library expresses in ~5 method calls.
 
 ### 🤖 AI-Assisted Architecture
 This project utilizes a custom **Senior Research Architect** agent (configured in `.github/agents/`). This agent is designed to enforce **SOLID principles**, strict **Type Hinting**, and **Google-style documentation**, ensuring the transition from research to production maintains the highest engineering standards.
@@ -81,6 +98,7 @@ This project utilizes a custom **Senior Research Architect** agent (configured i
 │   └── visualization/       # Professional plotting and 3D rendering utilities
 ├── test/
 │   └── visual_validation/   # Headless plot validation outputs
+├── Showcase.ipynb           # ✨ Fully-executed demonstration notebook
 ├── run_simulation.py        # ✨ Master pipeline entry point
 ├── .github/agents/          # Custom AI Architect Agent configurations
 ├── .gitignore               # Multi-language (Python/LaTeX) hygiene rules
@@ -91,7 +109,23 @@ This project utilizes a custom **Senior Research Architect** agent (configured i
 
 ---
 
-## 🚀 Getting Started
+## � Live Documentation
+
+The full API reference is hosted on **GitHub Pages**, auto-generated from Google-style docstrings with Sphinx 9 and the PyData Sphinx Theme:
+
+> 🔗 **[https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/](https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/)**
+
+| Page | Description |
+|:-----|:------------|
+| [Home](https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/) | Project overview and quick-start guide |
+| [Config API](https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/config_api.html) | `PhysicsConfig` & `NumericalConfig` frozen dataclasses |
+| [Physics API](https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/physics_api.html) | `BasePotential`, all concrete potentials, `ThermalEngine`, `ParticleType` |
+| [Solvers API](https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/solvers_api.html) | `BaseSolver`, `NumerovSolver`, `QuantumSystem` |
+| [Visualization API](https://SiririComun.github.io/Thermal-Quantum-Numerov-Solver/viz_api.html) | `QuantumPlotter` — all 4 plot methods |
+
+---
+
+## �🚀 Getting Started
 
 ### Prerequisites
 - Python 3.10+
