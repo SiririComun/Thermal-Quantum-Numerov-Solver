@@ -36,3 +36,11 @@ stack-data==0.6.3
 tornado==6.5.4
 traitlets==5.14.3
 wcwidth==0.6.0
+# ---------------------------------------------------------------------------
+# Documentation build dependencies
+# ---------------------------------------------------------------------------
+Sphinx==9.1.0
+pydata-sphinx-theme==0.16.1
+sphinx-design==0.7.0
+sphinx-bootstrap-theme==0.8.1
+sphinx-math-dollar==1.3
