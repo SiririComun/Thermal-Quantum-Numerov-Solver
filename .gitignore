@@ -25,4 +25,6 @@ test/visual_validation/*
 # Ignore the generated PDF version of the notebook
 legacy/*.pdf
 
-echo "docs/.doctrees/" >> .gitignoredocs/.doctrees/
+# Exclude Sphinx build cache
+.doctrees/
+docs/.doctrees/
